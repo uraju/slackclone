@@ -32,6 +32,10 @@
             templateUrl: 'message-list.html',
             controller: 'MessageListCtrl'
           }).
+           when('/user', {
+            templateUrl: 'user-list.html',
+            controller: 'userListCtrl'
+          }).
           when('/channels', {
             templateUrl: 'channel-list.html',
             controller: 'ChannelListCtrl'
@@ -118,7 +122,40 @@
             );
 
 
+ //user Info start here
     
+    slackApp
+   .controller('ChannelListCtrl', function ($http){
+     $http({
+                  method: 'POST',
+                  url: 'http://localhost:3000/rest/sendMessage/' + $scope.channel.id,
+                  headers: {
+                    'Content-Type': "application/json"
+                  },
+                  data: JSON.stringify($scope.channel)  // why zero????
+                  }).
+                  success( function (data) {
+                    alert("message saved!");         
+                    });
+            };
+
+
+        
+      });
+
+    
+
+
+
+
+
+    // End here
+
+
+
+
+
+
 
       slackApp
     .controller('ChannelListCtrl', function ($scope,  Slack){
@@ -233,7 +270,7 @@
     <div class="container">
  
      
-    <a ng-href="#/channels">Channels</a> |  <a href="#/">Messages (CLICK HERE FIRST)</a> |  <a href="#/search">Search</a> 
+    <a ng-href="#/user">Users</a> |  <a href="#/channels">Channels</a> | <a href="#/">Messages (CLICK HERE FIRST)</a> |  <a href="#/search">Search</a> 
     
     <div ng-view></div>
 
