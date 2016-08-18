@@ -1,6 +1,8 @@
 var express = require('express');
 var servlet = require('./servlet-handler.js');
 var rest = require('./rest-handler.js');
+var upload = require('./upload-handler.js');
+
 var app = express();
 var bodyParser = require("body-parser");
 var db = require('./dbHandler.js');
@@ -38,6 +40,10 @@ app.post('/rest/sendMessage/:channel', rest.sendMessage);
 app.get('/rest/messages/:channel', rest.getMessages); // change
 app.get('/rest/team/:team', rest.getTeam); // change
 app.get('/rest/userinfo/*', rest.getuserinfo);
+app.get('/upload/:channel/:filename', upload.upload); // change
+app.get('/download/:channel/:filename', upload.download);
+
+
 
 app.listen(3000, function () {
   console.log('Example app listening on port 3000!');
