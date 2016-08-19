@@ -345,9 +345,10 @@ function getUserInfoJSON(userId) {
              + "  WHERE ID = " + userId + "";
             console.log("user query" + query);
         var user;
-        db.each(query,
+            db.each(query,
             function(err, row) {
-                user = { id: userId, name: row.NAME,channels:row.INFO};
+                 user = JSON.parse(row.INFO);
+                console.log("selcection query" + user);
             },
             function(err) {
                 if(err) {

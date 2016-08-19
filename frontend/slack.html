@@ -71,20 +71,26 @@
       });
 
       // Create the factory that share the Fact
+     
+    
+
+     
       slackApp
       .factory('Slack', function($http){
         var o = {};
         
         o.userCb = function(callback, callback2){
-         // $http.get( '/rest/userinfo/'+o.user.id).
-         $http.get( 'user.json').
+          $http.get( '/rest/userinfo/'+o.user.id).
+        // $http.get( 'user.json').
              success( function (data) {
                   o.user = data;
                   callback(data);   
                   var l = [];
-                 console.log("data" + o.user.channels) ;
+                
                   for( var i in o.user.channels)
                     {
+                       console.log("data" + o.user.channels) ;
+                       console.log("i"+i);
                       console.log("---------->"+o.user.channels[i]);
                       l.push( o.user.channels[i].id);
                        console.log("ID------------->" + o.user.channels[i].id);
@@ -101,12 +107,14 @@
           };
 
         
-       // o.user = {id: 1};
-        o.user = {};
+     o.user = {id: 1};
+      //  o.user = {};
         o.messages =  [];
         o.channels = [];
         return o;
       });
+
+
 
       slackApp
     .controller('MessageListCtrl', function ($scope, $http, Slack){
@@ -174,9 +182,10 @@
                   success( function (data) {
                     $scope.userInfo =  data;
                    Slack.user =  $scope.userInfo ; 
+                   $scope.userdet = Slack.user; 
                    // console.log("user" + JSON.stringify(Slack.user));   
                   console.log("userDetails" + JSON.stringify(Slack.user));   
-                   // console.log("data", JSON.stringify($scope.userInfo));   
+                   console.log("datccccccccca", JSON.stringify( $scope.userdet));   
  
               });
             });

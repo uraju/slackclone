@@ -196,6 +196,7 @@ exports.getuserinfo = function (req, res) {
     console.log("------userID" + userid);
     db.getUserInfoJSON(userid).then(
         (userJSON) => {
+             res.setHeader('content-type', 'application/json');
             res.send(userJSON);
         }).catch((err) => {
             console.log('db error = ' + err);
