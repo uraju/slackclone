@@ -79,8 +79,8 @@
       .factory('Slack', function($http){
         var o = {};
         
-        o.userCb = function(callback, callback2){
-          $http.get( '/rest/userinfo/'+o.user.id).
+        o.userCb = function(callback, callback2, userid){
+          $http.get( '/rest/userinfo/'+ userid).
         // $http.get( 'user.json').
              success( function (data) {
                   o.user = data;
@@ -133,7 +133,7 @@
                 $scope.messages = messages;  
                 Slack.channels = data;
                 $scope.channels = Slack.channels; // fill in scope when done
-                }  
+                }, Slack.user.id
            
             );} 
                 
@@ -163,7 +163,7 @@
  //user details start here
 
    slackApp
-   .controller('userDetailCtrl', function ($scope,$http,Slack){
+   .controller('UserDetailCtrl', function ($scope,$http,Slack){
      var pathname = window.location.pathname;
      var url      = window.location.href; 
     console.log ("pathname" +pathname);
@@ -183,9 +183,7 @@
                     $scope.userInfo =  data;
                    Slack.user =  $scope.userInfo ; 
                    $scope.userdet = Slack.user; 
-                   // console.log("user" + JSON.stringify(Slack.user));   
-                  console.log("userDetails" + JSON.stringify(Slack.user));   
-                   console.log("datccccccccca", JSON.stringify( $scope.userdet));   
+          
  
               });
             });

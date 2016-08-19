@@ -472,6 +472,51 @@ textarea.ta-bind {
         $scope.messages = index; 
          
       }) 
+
+
+    
+   .controller('UserListCtrl', function ($scope,$http, Slack){
+     $http({
+                  method: 'get',
+                  url: '/rest/user/'
+                  }).
+                  success( function (data) {
+                   $scope.users =  data;
+                   Slack.users = data;
+                   //  console.log("data", JSON.stringify($scope.users));         
+              });
+            })
+
+
+    // End here
+
+ //user details start here
+
+   
+   .controller('UserDetailCtrl', function ($scope,$http,Slack){
+     var pathname = window.location.pathname;
+     var url      = window.location.href; 
+    console.log ("pathname" +pathname);
+    console.log("url" + url);
+    var parts = url.split('/');
+    var userid = parts[5];
+    console.log(userid);
+     $http({
+       
+                  method: 'get',
+                  url: '/rest/userinfo/'  +userid ,
+                  headers: {
+                    'Content-Type': "application/json"
+                  },
+                  }).
+                  success( function (data) {
+                    $scope.userInfo =  data;
+                   Slack.user =  $scope.userInfo ; 
+                   $scope.userdet = Slack.user; 
+ 
+              });
+            })
+  
    
   
 .config(function($mdIconProvider) {
@@ -619,6 +664,18 @@ function insertTextAtCursor(text) {
           DIRECT MESSAGES (2)
           <md-divider></md-divider>
         </p>
+
+          
+
+          <p ng-controller="UserListCtrl">
+          USERS
+          <md-divider></md-divider>
+         
+           <md-list-item  ng-repeat="user in users">
+              <span align="left"><md-icon md-svg-icon="avatar:svg-{{user.id + 1}}"></md-icon> {{user.name}} </span>
+            </md-list-item>
+          
+          </p>  
 
           <p>
           SEARCH CHANNELS
