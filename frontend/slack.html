@@ -36,6 +36,10 @@
             templateUrl: 'user-list.html',
             controller: 'userListCtrl'
           }).
+          when('/user/:user', {
+            templateUrl: 'user-detail.html',
+            controller: 'userDetailCtrl'
+          }).
           when('/channels', {
             templateUrl: 'channel-list.html',
             controller: 'ChannelListCtrl'
@@ -71,27 +75,32 @@
         var o = {};
         
         o.userCb = function(callback, callback2){
-          $http.get( 'user.json').
+         // $http.get( '/rest/userinfo/'+o.user.id).
+         $http.get( 'user.json').
              success( function (data) {
                   o.user = data;
                   callback(data);   
                   var l = [];
-                  console.log(o.user.channels);
+                 console.log("data" + o.user.channels) ;
                   for( var i in o.user.channels)
                     {
+                      console.log("---------->"+o.user.channels[i]);
                       l.push( o.user.channels[i].id);
+                       console.log("ID------------->" + o.user.channels[i].id);
                     }
-
-                   $http.get( 'http://localhost:3000/rest/messages/' + l.join()).   
+                   
+                 $http.get( '/rest/messages/' + l.join()).    
                         success( function (data) {
                               console.log("channel data" + data);
                               o.channels = data;
+                              //console.log("channel data" +JSON.stringify(data));
                               callback2(o.channels);               
                         });           
              });
           };
 
         
+       // o.user = {id: 1};
         o.user = {};
         o.messages =  [];
         o.channels = [];
@@ -122,42 +131,58 @@
             );
 
 
- //user Info start here
-    
-    slackApp
-   .controller('ChannelListCtrl', function ($http){
+ //user list start here
+
+   slackApp
+   .controller('userListCtrl', function ($scope,$http){
      $http({
-                  method: 'POST',
-                  url: 'http://localhost:3000/rest/sendMessage/' + $scope.channel.id,
+                  method: 'get',
+                  url: '/rest/user/',
                   headers: {
                     'Content-Type': "application/json"
                   },
-                  data: JSON.stringify($scope.channel)  // why zero????
                   }).
                   success( function (data) {
-                    alert("message saved!");         
-                    });
-            };
+                    $scope.users =  data;
+                   //  console.log("data", JSON.stringify($scope.users));         
+              });
+            });
+  
+    // End here
 
+ //user details start here
 
-        
-      });
-
-    
-
-
-
-
-
+   slackApp
+   .controller('userDetailCtrl', function ($scope,$http,Slack){
+     var pathname = window.location.pathname;
+     var url      = window.location.href; 
+    console.log ("pathname" +pathname);
+    console.log("url" + url);
+    var parts = url.split('/');
+    var userid = parts[5];
+    console.log(userid);
+     $http({
+       
+                  method: 'get',
+                  url: '/rest/userinfo/'  +userid ,
+                  headers: {
+                    'Content-Type': "application/json"
+                  },
+                  }).
+                  success( function (data) {
+                    $scope.userInfo =  data;
+                   Slack.user =  $scope.userInfo ; 
+                   // console.log("user" + JSON.stringify(Slack.user));   
+                  console.log("userDetails" + JSON.stringify(Slack.user));   
+                   // console.log("data", JSON.stringify($scope.userInfo));   
+ 
+              });
+            });
+  
     // End here
 
 
-
-
-
-
-
-      slackApp
+    slackApp
     .controller('ChannelListCtrl', function ($scope,  Slack){
 
         $scope.channels = Slack.channels;

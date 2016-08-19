@@ -171,6 +171,7 @@ function getChannelJSON(userId) {
     return new Promise((resolve, reject) => {
         console.log('getChannelJSON');
         var db = new sqlite3.Database('slack.db');
+        console.log("userId --------->" + userId);
         var query = "SELECT STUFF FROM CHANNEL "
             + "  WHERE ID IN (" + userId + ")";
 
@@ -284,6 +285,8 @@ function descDateCompare(a, b) {
     }  
 }
 
+// comemnted by Uma. Reason : Duplicate methods
+/*
 exports.getUserInfoJSON = getUserInfoJSON;
 function getUserInfoJSON(userId) {
     return new Promise((resolve, reject) => {
@@ -295,6 +298,56 @@ function getUserInfoJSON(userId) {
         db.each(query,
             function(err, row) {
                 user = { userId: userId, name: row.NAME };
+            },
+            function(err) {
+                if(err) {
+                    reject(err);
+                }
+                else {
+                    db.close();
+                    resolve(JSON.stringify(user));
+                }
+        });
+    });
+}
+*/
+exports.getUserList = getUserList;
+function getUserList() {
+    return new Promise((resolve, reject) => {
+    console.log('get user list');
+       var db = new sqlite3.Database('slack.db');
+       var query = "SELECT * FROM USER";
+        var userList = [];
+        db.each(query,
+            function(err, row) {
+                var user = { Id: row.ID, Name: row.NAME};
+                userList.push(user);
+            },
+            function(err) {
+                if(err) {
+                    reject(err);
+                }
+                else {
+                    db.close();
+                    resolve(JSON.stringify(userList));
+                }
+        });
+    });
+}
+
+
+exports.getUserInfoJSON = getUserInfoJSON;
+function getUserInfoJSON(userId) {
+    return new Promise((resolve, reject) => {
+        console.log('getUserInfo');
+        var db = new sqlite3.Database('slack.db');
+        var query = "SELECT NAME,INFO FROM USER "
+             + "  WHERE ID = " + userId + "";
+            console.log("user query" + query);
+        var user;
+        db.each(query,
+            function(err, row) {
+                user = { id: userId, name: row.NAME,channels:row.INFO};
             },
             function(err) {
                 if(err) {
