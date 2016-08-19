@@ -361,6 +361,7 @@ textarea.ta-bind {
                   }, user.id
             
               );
+              
               });
 
         $scope.addMessage = function() {
@@ -533,34 +534,7 @@ textarea.ta-bind {
 
     // End here
 
- //user details start here
-
-   
-   .controller('UserDetailCtrl', function ($scope,$http,Slack){
-     var pathname = window.location.pathname;
-     var url      = window.location.href; 
-    console.log ("pathname" +pathname);
-    console.log("url" + url);
-    var parts = url.split('/');
-    var userid = parts[5];
-    console.log(userid);
-     $http({
-       
-                  method: 'get',
-                  url: '/rest/userinfo/'  +userid ,
-                  headers: {
-                    'Content-Type': "application/json"
-                  },
-                  }).
-                  success( function (data) {
-                    $scope.userInfo =  data;
-                   Slack.user =  $scope.userInfo ; 
-                   $scope.userdet = Slack.user; 
- 
-              });
-            })
   
-   
   
 .config(function($mdIconProvider) {
   $mdIconProvider
@@ -687,10 +661,10 @@ function insertTextAtCursor(text) {
       <md-content layout-margin="">
 
         <p>
-          CHANNELS (3)
+          CHANNELS ({{channels.length}})
           <md-divider></md-divider>
           <ul>
-          <li ng-repeat="item in channels"><md-button  ng-click="changeChannel(item.id)">{{item.name}}</md-button>
+          <li ng-repeat="item in channels"><md-button  ng-click="changeChannel(item.id)">{{item.name}} ({{item.messages.length}})</md-button>
           </li>
         </ul>
         </p>
@@ -734,7 +708,7 @@ function insertTextAtCursor(text) {
       <div layout="column" layout-align="top right">
 
         <div>
-          <md-button ng-click="toggleLeft()" class="md-raised">
+          <md-button ng-click="toggleLeft()" class="md-raised md-primary">
             Show Channels
           </md-button>
       
@@ -774,7 +748,7 @@ function insertTextAtCursor(text) {
             <md-list-item ng-repeat="item in channelItems | filter:{content:searchText}  track by $index"  class="md-3-line">
               <md-icon md-svg-icon="avatar:svg-{{item.user.id + 1}}"></md-icon>
               <p ng-click="goToPerson(item.user.name, $event)"> <b>{{ item.user.name }}</b>: <span align="left" ng-bind-html="item.content"></span></p>
-              <md-checkbox class="md-secondary" ng-model="item.selected"></md-checkbox>  <!-- need a new attribute -->
+              <md-checkbox class="md-secondary" ng-model="item.selected"></md-checkbox>  <!-- seems to automatically add attribute -->
               <md-icon  ng-click="doSecondaryAction($event)" aria-label="Favorite" class="md-secondary md-hue-3">star</md-icon>
               <md-icon class="md-secondary" ng-click="doSecondaryAction($event)" aria-label="Chat" md-svg-icon="communication:message"></md-icon>
               <md-divider></md-divider>
@@ -798,7 +772,7 @@ function insertTextAtCursor(text) {
   </section>
 
   <md-content>
-    <md-icon  class="materials-icons">message</md-icon><md-button ng-click="addMessage()"><b>ADD MESSAGE</b></md-button> 
+    <md-icon  class="materials-icons">message</md-icon><md-button class="md-raised md-primary" ng-click="addMessage()"><b>ADD MESSAGE</b></md-button> 
           
     <text-angular ng-model="newMessage" name="editor" ta-text-editor-class="border-around" ta-html-editor-class="border-around"></text-angular>
 
