@@ -171,8 +171,8 @@ textarea.ta-bind {
       .factory('Slack', function($http){
         var o = {};
         
-        o.userCb = function(callback, callback2){
-          $http.get( 'user.json').
+        o.userCb = function(callback, callback2, userid){
+          $http.get( "/rest/userinfo/" + userid).
              success( function (data) {
                   o.user = data;
                   callback(data);   
@@ -201,7 +201,8 @@ textarea.ta-bind {
       });
 
       slackApp
-    .controller('MessageListCtrl', function ($scope, $http,  $mdDialog, $mdToast, Slack){
+    .controller('MessageListCtrl', function ($scope, $http,  $mdDialog, $mdToast, $rootScope, Slack){
+
 
        $scope.loggedin = Slack.loggedin;
         
@@ -220,8 +221,8 @@ textarea.ta-bind {
                 $scope.messages = messages;  
                 Slack.channels = data;
                 $scope.channels = Slack.channels; // fill in scope when done
-                }  
-           
+                }, 
+                Slack.user.id 
             );
           
         
@@ -239,15 +240,38 @@ textarea.ta-bind {
       .ok('Okay!');
 
     $mdDialog.show(confirm).then(function(result) {
-      $mdToast.show(
+      console.log(Slack.users);
+      // find user with same name
+      
+      var founduser = Slack.users.find(function(item){ return item.name === result });
+      
+      if( founduser != null )
+        {
+          $mdToast.show(
                       $mdToast.simple()
                         .textContent('Login Succesful!')
                         .position('top right')
                         .hideDelay(3000)
                     );
-      $scope.loggedin = true;
-      Slack.loggedin = true;
-    }, function() {
+         $scope.loggedin = true;
+         Slack.loggedin = true;  
+         Slack.user = founduser;
+         $scope.user = founduser;       
+         $rootScope.$broadcast('UserChangedEvent', founduser );   
+        }
+      else
+      {
+         $mdToast.show(
+                      $mdToast.simple()
+                        .textContent('Login Fail!')
+                        .position('top right')
+                        .hideDelay(3000)
+                    );
+         $scope.loggedin = false;
+          Slack.loggedin = false;
+      }   
+      
+     }, function() {
       $scope.loggedin = false;
       Slack.loggedin = false;
     });
@@ -268,7 +292,7 @@ textarea.ta-bind {
             $scope.channels = Slack.channels;
             $mdSidenav(componentId).toggle();
 
-          }
+          };
         }
   
         $scope.channels = Slack.channels;
@@ -277,7 +301,7 @@ textarea.ta-bind {
 
 
       slackApp
-    .controller('ChannelDetailCtrl', function ($scope, $routeParams, $http,  $timeout, $mdSidenav, $mdDialog,  $mdToast,  Slack){
+    .controller('ChannelDetailCtrl', function ($scope, $routeParams, $http,  $timeout, $mdSidenav, $mdDialog,  $mdToast, $rootScope, Slack){
 
         var find =  parseInt($routeParams.channel);
 
@@ -310,8 +334,33 @@ textarea.ta-bind {
 
         $scope.channels = Slack.channels;
 
+        $scope.user = Slack.user;
+
 
         }
+
+         $rootScope.$on("UserChangedEvent", function (event, user) {
+              Slack.userCb(function(data){
+              $scope.user = user; // fill in scope when done
+                  },  function(data ){
+
+                  console.log(data);
+
+                  var messages= [];
+                  for( var msg in data )
+                    {
+                    messages = messages.concat( data[msg].messages );
+                    }
+                  Slack.messages = messages;
+                  $scope.messages = messages;  
+                  console.log(data);
+                  Slack.channels = data;
+                  $scope.channels =data; // fill in scope when done
+                  $scope.changeChannel(data[0].id);
+                  }, user.id
+            
+              );
+              });
 
         $scope.addMessage = function() {
            
@@ -341,38 +390,38 @@ textarea.ta-bind {
                     });
             };
 
-      $scope.changeChannel = function(find) {
+        $scope.changeChannel = function(find) {
         
-        console.log(find);
+            console.log(find);
 
-        var channel = Slack.channels.find( function (item) { 
-                   return item.id === find;
-               } );
+            var channel = Slack.channels.find( function (item) { 
+                       return item.id === find;
+                   } );
 
-         console.log(channel);
+            console.log(channel);
 
-        if( channel != undefined ){
-        $scope.index = channel.messages;
+            if( channel != undefined ){
+            $scope.index = channel.messages;
+            
+    //         Slack.messages.filter( function (item) { 
+    //                    console.log(Slack.messages);
+    //                    console.log(find);
+    //                    return item.channel.indexOf(find) != -1;
+    //                } );
+
         
-//         Slack.messages.filter( function (item) { 
-//                    console.log(Slack.messages);
-//                    console.log(find);
-//                    return item.channel.indexOf(find) != -1;
-//                } );
+            $scope.channelItems = channel.messages;
 
-     
-        $scope.channelItems = channel.messages;
+            $scope.members = channel.team.members;
 
-        $scope.members = channel.team.members;
+            $scope.team = channel.team;
+            
+            $scope.channel = channel;
 
-        $scope.team = channel.team;
-        
-        $scope.channel = channel;
-
-        $scope.channels = Slack.channels;
+            $scope.channels = Slack.channels;
 
 
-        }
+            }
              
             };
 
@@ -529,14 +578,6 @@ textarea.ta-bind {
 })
 
 .controller('AppCtrl', function ($scope, $timeout, $mdSidenav) {
-    // $scope.toggleLeft = buildToggler('left');
-    // $scope.toggleRight = buildToggler('right');
-
-    // function buildToggler(componentId) {
-    //   return function() {
-    //     $mdSidenav(componentId).toggle();
-    //   }
-    // }
   })
 
 .config(function($mdIconProvider) {
@@ -723,7 +764,7 @@ function insertTextAtCursor(text) {
   </li>
 </ul>-->
          <div  ng-controller="ChannelDetailCtrl" >
-           <md-subheader class="md-primary">Channel: <b>{{channel.name}}</b>
+           <md-subheader class="md-primary">User: {{user.name}} Channel: <b>{{channel.name}}</b>
            <md-input-container class="md-icon-flo md-block">
             <!-- Use floating label instead of placeholder -->
             <md-icon  class="materials-icons">search</md-icon>
