@@ -98,7 +98,7 @@ textarea.ta-bind {
 
     </style>
 </head>
-<body ng-app="slackApp" ng-cloak>
+<body ng-app="slackApp">
   <!--
     Your HTML content here
   -->  
@@ -323,7 +323,8 @@ textarea.ta-bind {
 //                } );
 
      
-        $scope.channelItems = channel.messages;
+        $scope.channelItems.length = 0;
+        $scope.channelItems.concat( channel.messages );
 
         $scope.members = channel.team.members;
 
@@ -401,27 +402,20 @@ textarea.ta-bind {
             console.log(channel);
 
             if( channel != undefined ){
-            $scope.index = channel.messages;
-            
-    //         Slack.messages.filter( function (item) { 
-    //                    console.log(Slack.messages);
-    //                    console.log(find);
-    //                    return item.channel.indexOf(find) != -1;
-    //                } );
+                $scope.index = channel.messages;
+              
+                $scope.channelItems = channel.messages;
 
-        
-            $scope.channelItems = channel.messages;
+                $scope.members = channel.team.members;
 
-            $scope.members = channel.team.members;
+                $scope.team = channel.team;
+                
+                $scope.channel = channel;
 
-            $scope.team = channel.team;
-            
-            $scope.channel = channel;
-
-            $scope.channels = Slack.channels;
+                $scope.channels = Slack.channels;
 
 
-            }
+            } else {  alert("Channel Undefined!"); };
              
             };
 
@@ -763,7 +757,7 @@ function insertTextAtCursor(text) {
    from {{item.user.name}}
   </li>
 </ul>-->
-         <div  ng-controller="ChannelDetailCtrl" >
+         <div >
            <md-subheader class="md-primary">User: {{user.name}} Channel: <b>{{channel.name}}</b>
            <md-input-container class="md-icon-flo md-block">
             <!-- Use floating label instead of placeholder -->
