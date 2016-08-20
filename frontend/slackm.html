@@ -648,17 +648,20 @@ function insertTextAtCursor(text) {
   </md-content>
 </div>
 
-<div ng-controller="ChannelDetailCtrl" layout="column" style="height: 800px;" ng-cloak="" class="sidenavdemoCustomSidenav" ng-app="slackApp">
+<div ng-controller="ChannelDetailCtrl" layout="column" style="height: 1000px;" ng-cloak="" class="sidenavdemoCustomSidenav" ng-app="slackApp">
 
   <section layout="row" flex="">
 
-    <md-sidenav class="md-sidenav-left" md-component-id="left" md-disable-backdrop="" md-whiteframe="4">
+    <md-sidenav class="md-sidenav-left" md-component-id="left" md-disable-backdrop="" md-whiteframe="4"> 
 
       <md-toolbar class="md-theme-indigo">
         <h1 class="md-toolbar-tools">CHANNELS</h1>
       </md-toolbar>
 
       <md-content layout-margin="">
+
+        <md-icon md-svg-icon="avatar:svg-{{user.id + 1}}"></md-icon> <b>{{user.name}}</b>
+        
 
         <p>
           CHANNELS ({{channels.length}})
@@ -669,15 +672,11 @@ function insertTextAtCursor(text) {
         </ul>
         </p>
        
-        <p>
-          DIRECT MESSAGES (2)
-          <md-divider></md-divider>
-        </p>
-
+       
           
 
           <p ng-controller="UserListCtrl">
-          USERS
+          DIRECT MESSAGES
           <md-divider></md-divider>
          
            <md-list-item  ng-repeat="user in users">
@@ -732,16 +731,17 @@ function insertTextAtCursor(text) {
   </li>
 </ul>-->
          <div >
-           <md-subheader class="md-primary">User: {{user.name}} Channel: <b>{{channel.name}}</b>
-           <md-input-container class="md-icon-flo md-block">
-            <!-- Use floating label instead of placeholder -->
-            <md-icon  class="materials-icons">search</md-icon>
-            <input ng-model="searchText" type="text">
-          </md-input-container> 
-           
-           
-           
+           <md-subheader class="md-primary">
+            <span>
+              <md-input-container class="md-icon-flo md-block">
+                User: <b>{{user.name}}</b>   Channel: <b>{{channel.name}}</b>
+                <!-- Use floating label instead of placeholder -->
+                <md-icon  class="materials-icons">search</md-icon>
+                <input ng-model="searchText" type="text">
+              </md-input-container> 
+             </span> 
            </md-subheader>
+           
            <md-list ng-cloak="" class="listdemoListControls" ng-app="slackApp">
 
 
@@ -772,9 +772,11 @@ function insertTextAtCursor(text) {
   </section>
 
   <md-content>
-    <md-icon  class="materials-icons">message</md-icon><md-button class="md-raised md-primary" ng-click="addMessage()"><b>ADD MESSAGE</b></md-button> 
-          
-    <text-angular ng-model="newMessage" name="editor" ta-text-editor-class="border-around" ta-html-editor-class="border-around"></text-angular>
+    <md-subheader class="md-primary"> 
+         <md-icon  class="materials-icons">message</md-icon><md-button class="md-raised md-primary" ng-click="addMessage()"><b>ADD MESSAGE</b></md-button>      
+    </md-subheader>
+    <text-angular ng-model="newMessage"  
+    ta-toolbar="[['bold','italics','underline','strikeThrough','insertImage','insertLink','insertVideo']]"" name="editor" ta-text-editor-class="border-around" ta-html-editor-class="border-around"></text-angular>
 
   </md-content>
 
