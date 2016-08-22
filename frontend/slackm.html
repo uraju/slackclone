@@ -124,7 +124,7 @@ textarea.ta-bind {
 
   <script>
       var slackApp = //angular.module('slackApp', ['ngRoute']);
-            angular.module('slackApp',['ngMaterial', 'ngMessages', 'material.svgAssetsCache','ngRoute','textAngular'])
+            angular.module('slackApp',['ngMaterial', 'ngMessages', 'material.svgAssetsCache','ngRoute', 'textAngular'])
 
       slackApp.config(function($routeProvider) {
         $routeProvider.
@@ -787,9 +787,21 @@ function insertTextAtCursor(text) {
               <md-icon md-svg-icon="avatar:svg-{{item.user.id + 1}}"></md-icon>
               <p ng-click="goToPerson(item.user.name, $event)"> <b>{{ item.user.name }}</b>: <span align="left" ng-bind-html="item.content"></span></p>
               <md-checkbox class="md-secondary" ng-model="item.selected"></md-checkbox>  <!-- seems to automatically add attribute -->
-              <md-icon  ng-click="doSecondaryAction($event)" aria-label="Favorite" class="md-secondary md-hue-3">star</md-icon>
+            
+              
+              <md-button class="md-secondary md-icon-button"  ng-model="item.favorite" ng-click="item.favorite = !item.favorite">  
+               <div ng-switch="item.favorite">
+                    <md-icon ng-switch-when="true"  class="materials-icons" >star</md-icon>
+                    <md-icon ng-switch-when="false" class="materials-icons" >star_border</md-icon>    
+                    <md-icon ng-switch-default="false" class="materials-icons" >star_border</md-icon>              
+                </div>
+              </md-button>  
+              
+            
+
               <md-icon class="md-secondary" ng-click="doSecondaryAction($event)" aria-label="Chat" md-svg-icon="communication:message"></md-icon>
               <md-divider></md-divider>
+            
             </md-list-item>
             
           </md-list>
