@@ -452,6 +452,22 @@ textarea.ta-bind {
                     });
             };
 
+      $scope.editMessage = function( event, t) {
+          if( event.keyCode === 13 ){
+              console.log(event);
+              t.content = event.target.value; 
+              t.edit = false;
+          }
+       };  
+
+       $scope.removeMessage= function (messageId){
+            var index = $scope.channel.messages.findIndex( function (item) { 
+                   return item.id === messageId;
+               } );
+
+            $scope.channel.messages.splice(index, 1);
+       };
+
         $scope.changeChannel = function(find) {
            // this should actually change the channel using a retrieve.
            // also this should be polled!
@@ -785,7 +801,20 @@ function insertTextAtCursor(text) {
 
             <md-list-item ng-repeat="item in channelItems | filter:{content:searchText}  track by $index"  class="md-3-line">
               <md-icon md-svg-icon="avatar:svg-{{item.user.id + 1}}"></md-icon>
-              <p ng-click="goToPerson(item.user.name, $event)"> <b>{{ item.user.name }}</b>: <span align="left" ng-bind-html="item.content"></span></p>
+              <!--<p ng-click="goToPerson(item.user.name, $event)">--> 
+              <p>
+              <b>{{ item.user.name }}</b>: 
+              <p ng-switch="item.edit">
+                 <span align="left" ng-switch-when="false" ng-dblclick="item.edit = true"  ng-bind-html="item.content"></span>
+                <md-input-container ng-switch-when="true" >
+                    <label>Edit the Message:</label>
+                    <input align="left" type="text" ng-model="item.content" ng-keyup="editMessage($event, item)" />
+                </md-input-container>
+                <span align="left" ng-switch-default ng-dblclick="item.edit = false"  ng-bind-html="item.content"></span>
+              </p>    
+              </p>          
+              
+              <!--</p> -->
               <md-checkbox class="md-secondary" ng-model="item.selected"></md-checkbox>  <!-- seems to automatically add attribute -->
             
               
@@ -796,6 +825,10 @@ function insertTextAtCursor(text) {
                     <md-icon ng-switch-default="false" class="materials-icons" >star_border</md-icon>              
                 </div>
               </md-button>  
+
+              <md-button class="md-secondary md-icon-button" ng-click="removeMessage(item.id)">
+                <md-icon class="materials-icons" >remove</md-icon>
+              </md-button>
               
             
 
