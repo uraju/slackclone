@@ -113,6 +113,7 @@ textarea.ta-bind {
   <script src="dist/js/textAngular-rangy.min.js" type="text/javascript"></script>
 	<script src="dist/js/textAngular-sanitize.min.js" type="text/javascript"></script>
 	<script src="dist/js/textAngular.min.js" type="text/javascript"></script>
+  <script src="object-merge.js" type="text/javascript"></script>
   
   <script src="slack.js"></script>
 
@@ -377,11 +378,41 @@ textarea.ta-bind {
            $timeout(function() {
                 if( Slack.channel !== undefined){
                   Slack.channelCb(function(channel){
-                
-                        Slack.channel = channel[0];
-                        $scope.channelItems = Slack.channel.messages;
+                        needToSave = false;
+                        needToUpdate = false;
+                        needToMerge = false;
+                        // check first if Slack.channel (old channel) is same as scope
+                        if( !angular.equals($scope.channel, Slack.channel) ){
+                          // boolean... need to send changes!
+                          needToSave = true;
+                        } 
+
+                         if( !angular.equals(channel[0], Slack.channel) ){
+                          // boolean... need to send changes!
+                          needToUpdate = true;
+                        } 
+
+                        if( needToSave && needToUpdate){
+                          // merge
+                          var merge = Object.merge(Slack.channel, channel[0], $scope.channel);
+                          Slack.channel = merge['merged'];
+                          $scope.channel =  angular.copy(Slack.channel, $scope.channel); 
+                          $scope.addMessage(true);
+                          console.log("channel merged.");
+                        } else if (needToSave){
+                          angular.copy($scope.channel, Slack.channel); // save history
+                          $scope.addMessage(true);
+                          console.log("channel saved.");
+                        } else if (needToUpdate){
+                          Slack.channel = channel[0];
+                          angular.copy(Slack.channel, $scope.channel); // update from source
+                          console.log("channel updated");
+                        } else
+                          console.log("channel not changed.");
+
+                        $scope.channelItems = $scope.channel.messages;
                         //$scope.channel = Slack.channel;
-                        $scope.channel = channel[0];
+                        //$scope.channel = Slack.channel;
                         
 
                   }, Slack.channel.id );
@@ -391,10 +422,11 @@ textarea.ta-bind {
         };     
         poll();      
 
-        $scope.addMessage = function() {
+        $scope.addMessage = function(fromPoll) {
            
-              $scope.channel = Slack.channel;
-              $scope.channel.messages.push({id:$scope.channel.messages.length,  "content":$scope.newMessage, user: Slack.user} );
+              //$scope.channel = Slack.channel;
+              if( fromPoll !== true)
+                  $scope.channel.messages.push({id:$scope.channel.messages.length,  "content":$scope.newMessage, user: Slack.user} );
               $scope.newMessage = "";
 
               console.log(  JSON.stringify($scope.channel));
@@ -405,9 +437,9 @@ textarea.ta-bind {
                   method: 'POST',
                   url: 'http://localhost:3000/rest/sendMessage/' + $scope.channel.id,
                   headers: {
-                    'Content-Type': "application/json"
+                    'Content-Type': "application/json" 
                   },
-                  data: JSON.stringify($scope.channel)  // why zero????
+                  data: JSON.stringify($scope.channel) 
                   }).
                   success( function (data) {
                     $mdToast.show(
@@ -416,7 +448,7 @@ textarea.ta-bind {
                         .position('top right')
                         .hideDelay(3000)
                     );
-                   // alert("message saved!");         
+                         
                     });
             };
 
@@ -441,31 +473,8 @@ textarea.ta-bind {
             {
             $scope.channelItems = Slack.channel.messages;
             $scope.channel = Slack.channel;
-            //$scope.index = channel.messages;
-            }
-    //         var channel = Slack.channels.find( function (item) { 
-    //                    return item.id === find;
-    //                } );
-
-    //         console.log(channel);
-
-    //         if( channel !== undefined ){
-    //            // $scope.index = channel.messages;
-              
-    //             $scope.channelItems = channel.messages;
-
-    //             //$scope.members = channel.team.members;
-
-    //             //$scope.team = channel.team;
-                
-    //             $scope.channel = channel;
-
-    //             //$scope.channels = Slack.channels;
-
-
-    //         } else {  alert("Channel Undefined!"); };
-             
-            };
+            }       
+        };
 
 
         $scope.toggleLeft = buildToggler('left');
@@ -802,7 +811,7 @@ function insertTextAtCursor(text) {
 
   <md-content>
     <md-subheader class="md-primary"> 
-         <md-icon  class="materials-icons">message</md-icon><md-button class="md-raised md-primary" ng-click="addMessage()"><b>ADD MESSAGE</b></md-button>      
+         <md-icon  class="materials-icons">message</md-icon><md-button class="md-raised md-primary" ng-click="addMessage(false)"><b>ADD MESSAGE</b></md-button>      
     </md-subheader>
     <text-angular ng-model="newMessage"  
     ta-toolbar="[['bold','italics','underline','strikeThrough','insertImage','insertLink','insertVideo']]"" name="editor" ta-text-editor-class="border-around" ta-html-editor-class="border-around"></text-angular>
