@@ -800,19 +800,20 @@ function insertTextAtCursor(text) {
 
 
             <md-list-item ng-repeat="item in channelItems | filter:{content:searchText}  track by $index"  class="md-3-line">
-              <md-icon md-svg-icon="avatar:svg-{{item.user.id + 1}}"></md-icon>
+             <span layout-align="start center"> <md-icon md-svg-icon="avatar:svg-{{item.user.id + 1}}"></md-icon>  <b>{{ item.user.name }}</b>: </span>
               <!--<p ng-click="goToPerson(item.user.name, $event)">--> 
-              <p>
-              <b>{{ item.user.name }}</b>: 
-              <p ng-switch="item.edit">
-                 <span align="left" ng-switch-when="false" ng-dblclick="item.edit = true"  ng-bind-html="item.content"></span>
-                <md-input-container ng-switch-when="true" >
+              
+              <p layout-align="start center">
+              <div ng-switch="item.edit">
+                <div  ng-switch-when="false" ng-dblclick="item.edit = true"  ng-bind-html="item.content"></div>
+                <md-input-container  ng-switch-when="true" >
                     <label>Edit the Message:</label>
-                    <input align="left" type="text" ng-model="item.content" ng-keyup="editMessage($event, item)" />
+                    <input  type="text" ng-model="item.content" ng-keyup="editMessage($event, item)" />
                 </md-input-container>
-                <span align="left" ng-switch-default ng-dblclick="item.edit = false"  ng-bind-html="item.content"></span>
-              </p>    
-              </p>          
+                <div  ng-switch-default ng-dblclick="item.edit = false"  ng-bind-html="item.content"></div>
+              </div>  
+              </p>  
+                       
               
               <!--</p> -->
               <md-checkbox class="md-secondary" ng-model="item.selected"></md-checkbox>  <!-- seems to automatically add attribute -->
