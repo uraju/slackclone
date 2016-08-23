@@ -290,13 +290,14 @@ textarea.ta-bind {
     });
     } else { 
       $scope.loggedin = false; // toggle off!
-      $scope.user = undefined;
+      $scope.user = null;
       $mdToast.show(
                       $mdToast.simple()
                         .textContent('Logged Out!')
                         .position('top right')
                         .hideDelay(3000)
                     );
+       $rootScope.$broadcast('UserChangedEvent', null );   
     }
 
 
