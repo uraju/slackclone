@@ -492,6 +492,41 @@ textarea.ta-bind {
             }       
         };
 
+        $scope.changePrivateChannel = function(user1, user2) {
+       
+           var channelid;
+           for( var c of user1.private){
+               if( c.userid === user2.id ){
+                 channelid = c.channelid;
+                 break;
+               }
+
+           }; // look through private channels looking for user2 channel
+
+           // if no channel found create a new channel
+           // save that new channel.... 
+           // update user1 and user2 adding the new channel
+           if( channelid !== undefined ){
+              Slack.channelCb(function(channel){
+                  
+                    Slack.channel = channel[0];
+                    $scope.channelItems = Slack.channel.messages;
+                    $scope.channel = Slack.channel;
+                    //$scope.$apply(); no need!
+                  // need to update channels????
+
+              }, channelid );
+            
+              //   console.log(find);
+
+              if( Slack.channel !== undefined )
+                {
+                $scope.channelItems = Slack.channel.messages;
+                $scope.channel = Slack.channel;
+                };
+           } else { alert("No private channel found!") }; 
+        };
+
 
         $scope.toggleLeft = buildToggler('left');
         $scope.toggleRight = buildToggler('right');
@@ -738,10 +773,8 @@ function insertTextAtCursor(text) {
         <p>
           CHANNELS ({{channels.length}})
           <md-divider></md-divider>
-          <ul>
-          <li ng-repeat="item in channels"><md-button  ng-click="changeChannel(item.id)">{{item.name}} ({{item.messages.length}})</md-button>
-          </li>
-        </ul>
+          <md-list-item ng-repeat="item in channels"><md-button  ng-click="changeChannel(item.id)">{{item.name}} ({{item.messages.length}})</md-button>
+          </md-list-item>
         </p>
        
        
@@ -749,12 +782,11 @@ function insertTextAtCursor(text) {
 
           <p ng-controller="UserListCtrl">
           DIRECT MESSAGES
-          <md-divider></md-divider>
-         
-           <md-list-item  ng-repeat="user in users">
-              <span align="left"><md-icon md-svg-icon="avatar:svg-{{user.id + 1}}"></md-icon> {{user.name}} </span>
-            </md-list-item>
-          
+          <md-divider></md-divider>         
+           <md-list-item  ng-repeat="u in users">
+              <md-button ng-if="u.id !== user.id" ng-click="changePrivateChannel(user,u)"><md-icon md-svg-icon="avatar:svg-{{u.id + 1}}">
+                </md-icon> {{u.name}}</md-button> 
+            </md-list-item>   
           </p>  
 
           <p>
@@ -788,7 +820,7 @@ function insertTextAtCursor(text) {
            <md-subheader class="md-primary">
             <span>
               <md-input-container class="md-icon-flo md-block">
-                User: <b>{{user.name}}</b>   Channel: <b>{{channel.name}}</b>
+                User: <b>{{user.name}}</b>   Channel: <b>{{channel.name}}</b> <b>{{channel.id}}</b>
                 <!-- Use floating label instead of placeholder -->
                 <md-icon  class="materials-icons">search</md-icon>
                 <input ng-model="searchText" type="text">
