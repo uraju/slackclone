@@ -885,7 +885,7 @@ function insertTextAtCursor(text) {
                     <label>Edit the Message:</label>
                     <input  type="text" ng-model="item.content" ng-keyup="editMessage($event, item)" />
                 </md-input-container>
-                <div  ng-switch-default ng-dblclick="item.edit = false"  ng-bind-html="item.content"></div>
+                <div align="left" ng-switch-default ng-dblclick="item.edit = false"  ng-bind-html="item.content"></div>
               </div>  
               </p>  
                        
