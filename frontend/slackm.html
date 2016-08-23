@@ -213,6 +213,7 @@ textarea.ta-bind {
     .controller('MessageListCtrl', function ($scope, $http,  $mdDialog, $mdToast, $rootScope, Slack){
 
 
+       $scope.waiting = false;
        $scope.loggedin = Slack.loggedin;
         
           Slack.userCb(function(data){
@@ -248,8 +249,9 @@ textarea.ta-bind {
       .targetEvent(ev)
       .ok('Login');
      
-
-    $mdDialog.show(confirm).then(function(result) {
+    if( $scope.loggedin === false ){
+      $mdDialog.show(confirm).then(function(result) {
+      $scope.waiting = true;
       console.log(Slack.users);
       // find user with same name
       
@@ -268,6 +270,7 @@ textarea.ta-bind {
          Slack.user = founduser;
          $scope.user = founduser;       
          $rootScope.$broadcast('UserChangedEvent', founduser );   
+        $scope.waiting = false;
         }
       else
       {
@@ -285,6 +288,18 @@ textarea.ta-bind {
       $scope.loggedin = false;
       Slack.loggedin = false;
     });
+    } else { 
+      $scope.loggedin = false; // toggle off!
+      $scope.user = undefined;
+      $mdToast.show(
+                      $mdToast.simple()
+                        .textContent('Logged Out!')
+                        .position('top right')
+                        .hideDelay(3000)
+                    );
+    }
+
+
   };
     
   
@@ -461,14 +476,60 @@ textarea.ta-bind {
        };  
 
        $scope.removeMessage= function (messageId){
-            var index = $scope.channel.messages.findIndex( function (item) { 
+          
+               var index = $scope.channel.messages.findIndex( function (item) { 
                    return item.id === messageId;
                } );
-
-            $scope.channel.messages.splice(index, 1);
+               
+                $scope.channel.messages.splice(index, 1);
        };
 
-        $scope.changeChannel = function(find) {
+        $scope.removeChannelConfirm = function (id){
+           var confirm = $mdDialog.confirm()
+            .title('Would you like to remove the channel?')
+            .ok('OK')
+            .cancel('Cancel');
+
+            $mdDialog.show(confirm).then(function() {
+               
+               $scope.removeChannel(id);
+               $mdToast.show(
+                      $mdToast.simple()
+                        .textContent('Channel Removed!')
+                        .position('top right')
+                        .hideDelay(3000)
+                    );
+            }, function() {
+              // growl?
+            });
+
+           
+       };
+
+
+      $scope.removeChannel= function (channelId){
+            var index = $scope.user.channels.findIndex( function (item) { 
+                   return item.id === channelId;
+               } );
+
+            $scope.user.channels.splice(index, 1);
+            // need to save user
+       };
+
+
+
+       $scope.addChannel = function (channelId){
+            var index = $scope.user.channels.findIndex( function (item) { 
+                   return item.id === channelId;
+               } );
+
+            if( index === -1)
+                $scope.user.channels.push({id: channelId});
+            // need to save user
+       };
+
+
+      $scope.changeChannel = function(find) {
            // this should actually change the channel using a retrieve.
            // also this should be polled!
            
@@ -568,28 +629,9 @@ textarea.ta-bind {
     );
   };
 
-  $scope.doPrimaryAction = function(event) {
-    $mdDialog.show(
-      $mdDialog.alert()
-        .title('Primary Action')
-        .textContent('Primary actions can be used for one click actions')
-        .ariaLabel('Primary click demo')
-        .ok('Awesome!')
-        .targetEvent(event)
-    );
-  };
 
-  $scope.doSecondaryAction = function(event) {
-    $mdDialog.show(
-      $mdDialog.alert()
-        .title('Secondary Action')
-        .textContent('Secondary actions can be used for one click actions')
-        .ariaLabel('Secondary click demo')
-        .ok('Neat!')
-        .targetEvent(event)
-    );
-  };
 
+  
       });
 
        slackApp
@@ -732,17 +774,10 @@ function insertTextAtCursor(text) {
         <h2>
           <span>THE BOOTCAMP STACK CLONE</span>
         </h2>
+        <md-progress-linear ng-if="waiting" md-mode="indeterminate"></md-progress-linear>
         <span flex=""></span>
         
-       <md-button class="md-icon-button" aria-label="Favorite">
-          <md-icon  class="materials-icons">turned_in</md-icon>
-        </md-button>
-        <md-button class="md-icon-button" aria-label="Favorite">
-          <md-icon  class="materials-icons">star</md-icon>
-        </md-button>
-        <md-button class="md-icon-button" aria-label="More">
-          <md-icon md-svg-icon="img/icons/more_vert.svg"></md-icon>
-        </md-button>
+       
         <md-button class="md-icon-button" ng-click="showPrompt($event)">
            <div ng-switch="loggedin">
               <md-icon  class="materials-icons" ng-switch-when="true">lock_open</md-icon>
@@ -814,7 +849,14 @@ function insertTextAtCursor(text) {
           <md-button ng-click="toggleLeft()" class="md-raised md-primary">
             Show Channels
           </md-button>
-      
+        
+          <md-button class="md-raised md-secondary" ng-click="">
+            Invite Users
+          </md-button>
+
+           <md-button class="md-raised md-warn" ng-click="removeChannelConfirm(channel.id)" >
+            Remove Channel
+          </md-button>
 
          <div >
            <md-subheader class="md-primary">
@@ -860,13 +902,10 @@ function insertTextAtCursor(text) {
               </md-button>  
 
               <md-button class="md-secondary md-icon-button" ng-click="removeMessage(item.id)">
-                <md-icon class="materials-icons" >remove</md-icon>
+                <md-icon class="materials-icons" >delete_forever</md-icon>
               </md-button>
               
-            
-
-              <md-icon class="md-secondary" ng-click="doSecondaryAction($event)" aria-label="Chat" md-svg-icon="communication:message"></md-icon>
-              <md-divider></md-divider>
+               <md-divider></md-divider>
             
             </md-list-item>
             
