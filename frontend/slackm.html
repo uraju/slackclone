@@ -111,8 +111,8 @@ textarea.ta-bind {
   
   <script src="https://cdn.jsdelivr.net/lodash/4.15.0/lodash.min.js"></script>
   <script src="dist/js/textAngular-rangy.min.js" type="text/javascript"></script>
-	<script src="dist/js/textAngular-sanitize.min.js" type="text/javascript"></script>
-	<script src="dist/js/textAngular.min.js" type="text/javascript"></script>
+  <script src="dist/js/textAngular-sanitize.min.js" type="text/javascript"></script>
+  <script src="dist/js/textAngular.min.js" type="text/javascript"></script>
   <script src="object-merge.js" type="text/javascript"></script>
   
   <script src="slack.js"></script>
@@ -874,22 +874,25 @@ function insertTextAtCursor(text) {
            <md-list ng-cloak="" class="listdemoListControls" ng-app="slackApp">
 
 
-            <md-list-item ng-repeat="item in channelItems | filter:{content:searchText}  track by $index"  class="md-3-line">
-             <span layout-align="start center"> <md-icon md-svg-icon="avatar:svg-{{item.user.id + 1}}"></md-icon>  <b>{{ item.user.name }}</b>: </span>
+            <md-list-item  ng-repeat="item in channelItems | filter:{content:searchText}  track by $index"  class="md-3-line">
+                <md-icon class="md-avatar-icon md-48"  md-svg-icon="avatar:svg-{{item.user.id + 1}}"></md-icon>
+
+                <div class="md-list-item-text" layout="column">
+                <div>{{ item.user.name }}:</div>
               <!--<p ng-click="goToPerson(item.user.name, $event)">--> 
-              
-              <p layout-align="start center">
+
+              <div>
               <div ng-switch="item.edit">
                 <div  ng-switch-when="false" ng-dblclick="item.edit = true"  ng-bind-html="item.content"></div>
                 <md-input-container  ng-switch-when="true" >
                     <label>Edit the Message:</label>
                     <input  type="text" ng-model="item.content" ng-keyup="editMessage($event, item)" />
                 </md-input-container>
-                <div align="left" ng-switch-default ng-dblclick="item.edit = false"  ng-bind-html="item.content"></div>
-              </div>  
-              </p>  
-                       
-              
+                <div ng-switch-default ng-dblclick="item.edit = false"  ng-bind-html="item.content"></div>
+              </div>
+              </div>
+              </div>
+
               <!--</p> -->
               <md-checkbox class="md-secondary" ng-model="item.selected"></md-checkbox>  <!-- seems to automatically add attribute -->
             
