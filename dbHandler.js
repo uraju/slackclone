@@ -505,7 +505,7 @@ function getUserList() {
         var userList = [];
         db.each(query,
             function(err, row) {
-                var user = { Id: row.ID, Name: row.NAME};
+                var user = JSON.parse(row.INFO);
                 userList.push(user);
             },
             function(err) {

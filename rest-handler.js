@@ -107,6 +107,7 @@ exports.user = function (req, res) {
    
     db.getUserList().then(
         (userJSON) => {
+            res.setHeader('content-type', 'application/json');
             res.send(userJSON);
         }).catch((err) => {
             console.log('db error = ' + err);
