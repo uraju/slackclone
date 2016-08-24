@@ -1,29 +1,30 @@
 <html ng-app="slackApp">
- <head>
+
+<head>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <!-- Angular Material style sheet -->
   <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/angular_material/1.1.0-rc2/angular-material.min.css">
 
-    <title>The Slack Clone</title>
-    <link rel="stylesheet" href="./dist/css/bootstrap.css" >
+  <title>The Slack Clone</title>
+  <link rel="stylesheet" href="./dist/css/bootstrap.css">
 
-    <!-- Optional theme -->
-	<link rel="stylesheet" href="./dist/css/bootstrap-theme.css" >
- 
+  <!-- Optional theme -->
+  <link rel="stylesheet" href="./dist/css/bootstrap-theme.css">
+
   <link href="./dist/css/bootstrap-material-design.css" rel="stylesheet">
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.8/angular.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.8/angular-route.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.8/angular.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.8/angular-route.min.js"></script>
 
-    
-    <script src="https://cdn.jsdelivr.net/lodash/4.15.0/lodash.min.js"></script>
-    <script src="slack.js"></script>
 
-<!-- Angular Material Library -->
+  <script src="https://cdn.jsdelivr.net/lodash/4.15.0/lodash.min.js"></script>
+  <script src="slack.js"></script>
+
+  <!-- Angular Material Library -->
   <script src="http://ajax.googleapis.com/ajax/libs/angular_material/1.1.0-rc2/angular-material.min.js"></script>
- 
-    <script>
-      var slackApp
+
+  <script>
+  var slackApp
      = angular.module('slackApp', ['ngRoute']);
 
       slackApp.config(function($routeProvider) {
@@ -35,6 +36,10 @@
            when('/user', {
             templateUrl: 'user-list.html',
             controller: 'userListCtrl'
+          }).
+          when('/user/:user', {
+            templateUrl: 'user-detail.html',
+            controller: 'userDetailCtrl'
           }).
           when('/channels', {
             templateUrl: 'channel-list.html',
@@ -66,37 +71,50 @@
       });
 
       // Create the factory that share the Fact
+     
+    
+
+     
       slackApp
       .factory('Slack', function($http){
         var o = {};
         
-        o.userCb = function(callback, callback2){
-          $http.get( 'user.json').
+        o.userCb = function(callback, callback2, userid){
+          $http.get( '/rest/userinfo/'+ userid).
+        // $http.get( 'user.json').
              success( function (data) {
                   o.user = data;
                   callback(data);   
                   var l = [];
-                  console.log(o.user.channels);
+                
                   for( var i in o.user.channels)
                     {
+                       console.log("data" + o.user.channels) ;
+                       console.log("i"+i);
+                      console.log("---------->"+o.user.channels[i]);
                       l.push( o.user.channels[i].id);
+                       console.log("ID------------->" + o.user.channels[i].id);
                     }
-
-                   $http.get( 'http://localhost:3000/rest/messages/' + l.join()).   
+                   
+                 $http.get( '/rest/messages/' + l.join()).    
                         success( function (data) {
                               console.log("channel data" + data);
                               o.channels = data;
+                              //console.log("channel data" +JSON.stringify(data));
                               callback2(o.channels);               
                         });           
              });
           };
 
         
-        o.user = {};
+     o.user = {id: 1};
+      //  o.user = {};
         o.messages =  [];
         o.channels = [];
         return o;
       });
+
+
 
       slackApp
     .controller('MessageListCtrl', function ($scope, $http, Slack){
@@ -115,49 +133,65 @@
                 $scope.messages = messages;  
                 Slack.channels = data;
                 $scope.channels = Slack.channels; // fill in scope when done
-                }  
+                }, Slack.user.id
            
             );} 
                 
             );
 
 
- //user Info start here
-    
-    slackApp
-   .controller('ChannelListCtrl', function ($http){
+ //user list start here
+
+   slackApp
+   .controller('userListCtrl', function ($scope,$http){
      $http({
-                  method: 'POST',
-                  url: 'http://localhost:3000/rest/sendMessage/' + $scope.channel.id,
+                  method: 'get',
+                  url: '/rest/user/',
                   headers: {
                     'Content-Type': "application/json"
                   },
-                  data: JSON.stringify($scope.channel)  // why zero????
                   }).
                   success( function (data) {
-                    alert("message saved!");         
-                    });
+                   $scope.users =  data;
+                   //  console.log("data", JSON.stringify($scope.users));         
+              });
             });
-
-
-        
-//      });
-
-   
-
-
-
 
 
     // End here
 
+ //user details start here
+
+   slackApp
+   .controller('UserDetailCtrl', function ($scope,$http,Slack){
+     var pathname = window.location.pathname;
+     var url      = window.location.href; 
+    console.log ("pathname" +pathname);
+    console.log("url" + url);
+    var parts = url.split('/');
+    var userid = parts[5];
+    console.log(userid);
+     $http({
+       
+                  method: 'get',
+                  url: '/rest/userinfo/'  +userid ,
+                  headers: {
+                    'Content-Type': "application/json"
+                  },
+                  }).
+                  success( function (data) {
+                    $scope.userInfo =  data;
+                   Slack.user =  $scope.userInfo ; 
+                   $scope.userdet = Slack.user; 
+          
+ 
+              });
+            });
+  
+    // End here
 
 
-
-
-
-
-      slackApp
+    slackApp
     .controller('ChannelListCtrl', function ($scope,  Slack){
 
         $scope.channels = Slack.channels;
@@ -263,18 +297,21 @@
          
       });
     </script>
-  </head>
-  <body>
-    <h1 class="md-display-3">The Slack Clone</h1>
-     
-    <div class="container">
- 
-     
-    <a ng-href="#/user">Users</a> |  <a href="#/channels">Channels</a> | <a href="#/">Messages (CLICK HERE FIRST)</a> |  <a href="#/search">Search</a> 
-    
+</head>
+
+<body>
+  <h1 class="md-display-3">The Slack Clone</h1>
+
+  <div class="container">
+
+
+    <a ng-href="#/user">Users</a> | <a href="#/channels">Channels</a> | <a href="#/">Messages (CLICK HERE FIRST)</a> |
+    <a href="#/search">Search</a>
+
     <div ng-view></div>
 
-    </div>
-    <p>[ footer ]</p>
-  </body>
+  </div>
+  <p>[ footer ]</p>
+</body>
+
 </html>

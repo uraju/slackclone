@@ -39,11 +39,10 @@ app.post('/servlet/signup', servlet.signup);
 app.post('/rest/sendMessage/:channel', rest.sendMessage);
 app.get('/rest/messages/:channel', rest.getMessages); // change
 app.get('/rest/team/:team', rest.getTeam); // change
-app.get('/rest/userinfo/*', rest.getuserinfo);
+app.get('/rest/userinfo/:user', rest.getuserinfo);
+app.get('/rest/user/', rest.user);
 app.get('/upload/:channel/:filename', upload.upload); // change
 app.get('/download/:channel/:filename', upload.download);
-
-
 
 app.listen(3000, function () {
   console.log('Example app listening on port 3000!');

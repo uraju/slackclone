@@ -28,6 +28,20 @@ exports.sendMessage = function (req, res) {
      );   
 }
 
+// list all the users
+
+exports.user = function (req, res) {
+    console.log('get user');
+   
+    db.getUserList().then(
+        (userJSON) => {
+            res.setHeader('content-type', 'application/json');
+            res.send(userJSON);
+        }).catch((err) => {
+            console.log('db error = ' + err);
+        }
+    );}
+
 
 /*
 exports.sendMessage = function (req, res) {
@@ -179,9 +193,11 @@ exports.getuserinfo = function (req, res) {
     console.log('path=' + req);
     var parts = req.path.split('/');
     var userid = parts[3];
-
+    console.log("params" + req.params.user);
+    console.log("------userID" + userid);
     db.getUserInfoJSON(userid).then(
         (userJSON) => {
+             res.setHeader('content-type', 'application/json');
             res.send(userJSON);
         }).catch((err) => {
             console.log('db error = ' + err);
