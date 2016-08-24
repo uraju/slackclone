@@ -1,0 +1,19 @@
+<p>Messages in channel: {{channel.name}}</p>
+
+Search: <input type="text" ng-model="search"/>
+
+
+<ul>
+  <li ng-repeat="item in channelItems | filter: search"><a ng-href="#/message/{{item.id}}">{{item.content}}</a>
+   from {{item.user.name}}
+  </li>
+</ul>
+
+<p>Members in team: {{team.name}}</p>
+
+<ul>
+  <li ng-repeat="item in members">{{item.name}}
+  </li>
+</ul>
+
+<input type="text" ng-model="newMessage"/><button ng-click="addMessage()">Add Message</button>
