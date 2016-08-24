@@ -24,6 +24,7 @@
   <script src="http://ajax.googleapis.com/ajax/libs/angular_material/1.1.0-rc2/angular-material.min.js"></script>
 
   <script>
+  //var showList;
   var slackApp
      = angular.module('slackApp', ['ngRoute']);
 
@@ -41,6 +42,7 @@
             templateUrl: 'user-detail.html',
             controller: 'userDetailCtrl'
           }).
+        
           when('/channels', {
             templateUrl: 'channel-list.html',
             controller: 'ChannelListCtrl'
@@ -65,7 +67,18 @@
             templateUrl: 'cart.html',
             controller: 'CartCtrl'
           }).
-          otherwise({
+         
+           when('/channellist', {
+            templateUrl: 'addChannel.html',
+            controller: 'viewChannelCtrl',
+          }).
+         /* 
+         when('/addchannel/:channelid', {
+            templateUrl: 'addChannel.html',
+            controller: 'addChannelCtrl'
+          }).
+          */
+            otherwise({
             redirectTo: '/'
           });
       });
@@ -184,8 +197,8 @@
                    Slack.user =  $scope.userInfo ; 
                    $scope.userdet = Slack.user; 
                    // console.log("user" + JSON.stringify(Slack.user));   
-                  console.log("userDetails" + JSON.stringify(Slack.user));   
-                   console.log("datccccccccca", JSON.stringify( $scope.userdet));   
+                  //console.log("userDetails" + JSON.stringify(Slack.user));   
+                  // console.log("datccccccccca", JSON.stringify( $scope.userdet));   
  
               });
             });
@@ -288,16 +301,287 @@
                
         $scope.keys = Object.keys(index);
         $scope.messages = index; //Shop.items.shop[index];
-        
-//         $scope.cart = Shop.cart;
-
-//         $scope.addToCart = function() {
-//            Shop.cart.push($scope.item);           
-//            console.log($scope.item);
-//            };
 
          
       });
+      
+// Get the channel from the Channel table
+
+      slackApp
+    .controller('viewChannelCtrl', function ($scope,$http,Slack){
+		$scope.user = Slack.user;
+      console.log ("get user first for -------"  + $scope.user.id);
+        $scope.boxShow1 = true;
+        $scope.boxShow = false;
+            $http({
+                  method: 'get',
+                  url: '/rest/channel/',
+                  headers: {
+                    'Content-Type': "application/json"
+                  },
+                  }).
+                  success( function (data) {
+                   $scope.channelsList =  data;
+				           Slack.channelsList =  data;
+                       
+              });
+
+   // Adding existing channel to the user           
+		$scope.addChannel = function(channelid) {
+			console.log("viewChannelCtrl addChannel to user, channel id  " + channelid);
+			//$scope.messages = [];
+			//$scope.messages.push(message); 
+			//console.log("viewChannelCtrl messages " + $scope.messages);
+			var nchannels = $scope.user.channels;
+			var ch = JSON.parse('{"id": "' + channelid + '"}' );
+			$http({
+                method: 'post',
+                url: '/rest/user/'+ $scope.user.id +'/addChannel/'+channelid,
+                headers: {'Content-Type': "application/json"},
+				//data: JSON.stringify($scope.channel)}).
+				data: JSON.stringify($scope.user)}).
+                success(function (data) {
+					console.log ("viewChannelCtrl addChannel completed! -------"  + data);
+					if (data == 'Added successfully') {
+						nchannels.push(ch);
+						/*
+						$http({
+						method: 'get',
+						url: '/rest/userinfo/'  +$scope.user.id ,
+						headers: {
+						  'Content-Type': "application/json"
+						},
+						}).
+						success( function (data) {
+						  console.log ("Got user data -------"  + data);
+						  $scope.user =  data;
+						  Slack.user =  data ; 
+						});
+						*/
+						//window.location.reload();
+					}				   
+                  
+                });
+ 				 
+      };	  
+
+    // updating the channel from the user table
+		$scope.removeChannel = function(channelid) {
+			console.log("viewChannelCtrl removeChannel to user, channel id  " + channelid);
+			//$scope.messages = [];
+			//$scope.messages.push(message); 
+			//console.log("viewChannelCtrl messages " + $scope.messages);
+			var nchannels = $scope.user.channels;
+			var ch = JSON.parse('{"id": "' + channelid + '"}' );
+			//console.log("viewChannelCtrl removeChannel messages " + $scope.messages);
+			$http({
+                  method: 'post',
+                  url: '/rest/user/'+ $scope.user.id +'/removeChannel/'+channelid,
+                  headers: {'Content-Type': "application/json"},
+				  data: JSON.stringify($scope.channel)}).
+                  success(function (data) {
+                   console.log ("viewChannelCtrl removeChannel completed! -------"  + data);
+                  if (data == 'Removed successfully') {
+				            	var idx;
+					
+                  for(idx = 0; idx < nchannels.length; idx++) {
+                    if (nchannels[idx].id == channelid){
+                      nchannels.splice(idx,1);
+                    }
+                  }
+				  
+                  /*   $http({
+                        method: 'get',
+                        url: '/rest/userinfo/'  +$scope.user.id ,
+                        headers: {
+                          'Content-Type': "application/json"
+                        },
+                        }).
+                        success( function (data) {
+                          console.log ("Got user data -------"  + data);
+                          $scope.user =  data;
+                          Slack.user =  data ; 
+                        });
+                    //window.location.reload();
+					*/
+                  }	
+                });
+				   			   
+           };	  
+
+		// add new channel to the Channel table and update user table
+
+			$scope.addNewChannel = function(message,form) {
+					 console.log("Log form" + form);
+           $scope.showMsgs = false;
+              if (form.$invalid) {
+                 $scope.showMsgs = true;
+            } else {
+                $scope.showMsgs = false;  
+            $scope.messages = [];
+            $scope.messages.push(message); 
+            console.log("viewChannelCtrl addNewChannel messages " + $scope.messages);
+					  $http({
+                  method: 'post',
+                  url: '/rest/user/'+ $scope.user.id +'/addNewChannel/'+message,
+                  headers: {'Content-Type': "application/json"},
+				  data: JSON.stringify($scope.channel)}).
+                  success(function (data) {
+                   console.log ("viewChannelCtrl addNewChannel completed! -------"  + data);
+				   var res = data.split(" ");
+				   if (res.length >= 3) { // Added Channel channelid
+						if(res[0] == 'Added'){
+							var nchannels = $scope.user.channels;
+							var ch = JSON.parse('{"id": "' + res[2] + '"}' );
+							nchannels.push(ch);		//add to user channel list
+							var schn = '{"id": "' + res[2] + '", "Channel": "' + message + '"}';
+							console.log('viewChannelCtrl addNewChannel post: ' + schn);
+							var chn = JSON.parse(schn);  // note only id and Channel is usable
+							var nchn = $scope.channelsList;
+							nchn.push(chn);
+							$scope.channelsList = nchn;
+							Slack.channelsList = nchn;
+							console.log('viewChannelCtrl addNewChannel nchn: ' + nchn);
+						}
+				   }
+				   /*
+				   if (data == 'Added Channel') {
+					// console.log("add new channelS" +data);
+					$http({
+                        method: 'get',
+                       url: '/rest/channel/',
+                        headers: {
+                          'Content-Type': "application/json"
+                        },
+                        }).
+                        success( function (data) {
+                          $scope.channelsList =  data;
+				                  Slack.channelsList =  data;
+                        });
+
+				            	//	window.location.reload();
+					}
+					$http({
+                        method: 'get',
+                        url: '/rest/userinfo/'  +$scope.user.id ,
+                        headers: {
+                          'Content-Type': "application/json"
+                        },
+                        }).
+                        success( function (data) {
+                          console.log ("Got user data -------"  + data);
+                          $scope.user =  data;
+                          Slack.user =  data ; 
+                        });
+					*/
+				   });
+				   
+               $scope.name = '';
+                 }
+        };	  
+			$scope.checkForUserChannel = function(channelid) {
+				var channels = Slack.user.channels;
+			//	console.log ("channelid " + channelid);
+				var idx;
+				for (idx = 0; idx < channels.length; idx++) {
+					if (channels[idx].id == channelid) {
+						return true;
+					}
+				}
+				return false;
+			};
+              
+     });
+
+ /*
+ slackApp
+    .controller('addChannelCtrl', function ($scope, $http, $routeParams, Slack){
+     
+		$scope.user = Slack.user;
+      $scope.channel = $routeParams.channelName;
+      console.log("addChannelCtrl ---------------!!!!1" + Slack.channelsList);
+      
+      $scope.channelsList =  Slack.channelsList;
+      $scope.boxShow1 = true;
+      $scope.boxShow = true;     
+		$scope.addChannel = function(message) {
+					 console.log("addChannelCtrl Log " + message);
+                      $scope.messages = [];
+                      $scope.messages.push(message); 
+                      console.log("addChannelCtrl messages " + $scope.messages);
+					  $http({
+                  method: 'post',
+                  url: '/rest/user/'+ $scope.user.id +'/addChannel/'+message,
+                  headers: {'Content-Type': "application/json"},
+				  data: JSON.stringify($scope.channel)}).
+                  success(function (data) {
+                   console.log ("addChannelCtrl addChannel completed! -------"  + data);});
+          };	  
+/*
+
+			$scope.addNewChannel = function(message) {
+					 console.log("addNewChannel Log " + message);
+                      $scope.messages = [];
+                      $scope.messages.push(message); 
+                      console.log("addChannelCtrl addNewChannel messages " + $scope.messages);
+					  $http({
+                  method: 'post',
+                  url: '/rest/user/'+ $scope.user.id +'/addNewChannel/'+message,
+                  headers: {'Content-Type': "application/json"},
+				  data: JSON.stringify($scope.channel)}).
+                  success(function (data) {
+                   console.log ("addChannelCtrl addNewChannel completed! -------"  + data);});
+           };	 
+           */ 
+/*
+			$scope.isAddChannel = function(message) {
+				var pathname = window.location.pathname;
+				var url      = window.location.href; 
+				console.log ("pathname " +pathname);
+				console.log("url " + url);
+				var parts = url.split('/');
+				console.log("parts length " + parts.length);
+				if (parts.length > 5) {
+					console.log("AddChannel ID" + parts[5]);
+					if (parts[5] == message) {
+						return true;
+					}
+				}
+				return false;
+			};
+     
+    });
+    */
+      
+     /*  $scope.addChannel = function(message) {
+           $scope.messages = [];
+          $scope.messages.push(message); 
+           console.log("messages" + $scope.messages);
+
+              
+            };
+  
+    });
+*/
+
+//End
+
+/*
+function isAddChannel1(channelid) {
+    var pathname = window.location.pathname;
+    var url      = window.location.href; 
+    console.log ("pathname" +pathname);
+    console.log("url" + url);
+    var parts = url.split('/');
+	if (parts.length > 3) {
+		console.log("AddChannel Part" + parts[3]);
+		if (parts[3] == channelid) {
+			return true;
+		}
+	}
+	return false;
+}
+*/
     </script>
 </head>
 
@@ -308,7 +592,7 @@
 
 
     <a ng-href="#/user">Users</a> | <a href="#/channels">Channels</a> | <a href="#/">Messages (CLICK HERE FIRST)</a> |
-    <a href="#/search">Search</a>
+    <a href="#/search">Search</a> | <a href="#/channellist">Add Channel</a>
 
     <div ng-view></div>
 
