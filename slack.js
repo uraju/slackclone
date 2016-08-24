@@ -32,8 +32,8 @@ Timestamp
 
 */
 
-// var _ = require('lodash');
-// var db =  require('./dbHandler.js');
+var _ = require('lodash');
+var db =  require('./dbHandler.js');
 
 class User
 {
@@ -178,10 +178,10 @@ class Team{
 
 
 
-// exports.User = User;
-// exports.Channel = Channel;
-// exports.Message = Message;
-// exports.Team = Team;
-// exports.Manager = Manager;
+exports.User = User;
+exports.Channel = Channel;
+exports.Message = Message;
+exports.Team = Team;
+exports.Manager = Manager;
 
-// exports.mgr = new Manager(); 
+exports.mgr = new Manager(); 
