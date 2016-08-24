@@ -107,7 +107,6 @@ exports.user = function (req, res) {
    
     db.getUserList().then(
         (userJSON) => {
-            res.setHeader('content-type', 'application/json');
             res.send(userJSON);
         }).catch((err) => {
             console.log('db error = ' + err);
@@ -130,14 +129,77 @@ exports.channel = function (req, res) {
 //End
 
 
-exports.getMessages = function (req, res) {
-    /*
-    console.log('get messages');
-    console.log("id" + req.params.channel);   
-    mgr.retrieveChannelById(req.params.channel).then(
+
+
+/*
+exports.sendMessage = function (req, res) {
+    console.log('send message');
+
+    // user from somewhere
+    // read channel .... receive back channel
+
+   // channel.add messagw ( message )
+   //// channel.addMessage(userA, message);        
+   // mgr.updateChannel (channel)
+
+   var userid =  req.params.channel;
+   var message = req.params.channel;
+   // var obj;
+   mgr.retrieveChannelById(userid).then(
+
+    (data) => {
+
+        console.log("data" + data);
+        obj = JSON.stringify(data);
+        console.log("string" + obj);
+         //obj = JSON.parse(data);
+        // console.log("I am here" + obj);
+
+         res.send(obj);
+                 
+        mgr.updateChannel(userid,obj).then(
+         (message) => {
+          res.send(message);
+         }
+         
+         ).catch((err) => {
+            console.log('db error = ' + err);
+        }
+     );   
+   
+    }
+
+    ).catch((err) => {
+            console.log('db error = ' + err);
+        }
+   );
+}
 */
-    var userid = req.params.channel;
-     db.getChannelJSON(userid).then(
+
+  /*
+    mgr.addChannel(message).then(
+        
+    (data) => {
+
+        console.log("data" + data);
+          res.send(data);
+         }
+         ).catch((err) => {
+            console.log('db error = ' + err);
+        }
+     );   
+   
+}
+  */
+
+exports.getMessages = function (req, res) {
+    console.log('get messages');
+    
+    //var channel =  mgr.createChannel("Team Channel");
+
+    
+    mgr.retrieveChannelById(req.params.channel).then(
+
     (data) => {
 
         console.log("data" + data);
@@ -228,5 +290,4 @@ exports.getuserinfo = function (req, res) {
         }).catch((err) => {
             console.log('db error = ' + err);
         }
-    );
-}
+    );}

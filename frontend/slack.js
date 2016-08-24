@@ -179,7 +179,7 @@ class Team{
 
 
  exports.User = User;
- exports.Channel = Channel;
+exports.Channel = Channel;
  exports.Message = Message;
  exports.Team = Team;
 exports.Manager = Manager;
