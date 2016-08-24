@@ -347,7 +347,7 @@ textarea.ta-bind {
 
 
       slackApp
-    .controller('ChannelDetailCtrl', function ($scope, $routeParams, $http,  $timeout, $mdSidenav, $mdDialog,  $mdToast, $rootScope, Slack){
+    .controller('ChannelDetailCtrl', function ($scope, $routeParams, $http,  $timeout, $mdSidenav, $mdDialog, $mdToast, $rootScope, Slack){
 
         var find =  parseInt($routeParams.channel);
 
@@ -669,7 +669,35 @@ textarea.ta-bind {
 			};
   
 
+    $scope.showInvites = function(ev) {
+        $mdDialog.show({
+          controller: DialogController,
+          templateUrl: 'invite.tmpl.html',
+          parent: angular.element(document.body),
+          targetEvent: ev,
+          clickOutsideToClose:true,
+          fullscreen: $scope.customFullscreen // Only for -xs, -sm breakpoints.
+        })
+        .then(function(answer) {
+          // update the users!
+        }, function() {
+         // cancel the dialog
+        });
+      };
 
+       function DialogController($scope, $mdDialog) {
+        $scope.hide = function() {
+          $mdDialog.hide();
+        };
+
+        $scope.cancel = function() {
+          $mdDialog.cancel();
+        };
+
+        $scope.answer = function(answer) {
+          $mdDialog.hide(answer);
+        };
+      } 
 
       $scope.changeChannel = function(find) {
            // this should actually change the channel using a retrieve.
@@ -995,7 +1023,7 @@ function insertTextAtCursor(text) {
             Show Channels
           </md-button>
         
-          <md-button class="md-raised md-secondary" ng-click="">
+          <md-button class="md-raised md-secondary" ng-click="showInvites()">
             Invite Users
           </md-button>
 
@@ -1087,7 +1115,7 @@ function insertTextAtCursor(text) {
 
 <!--- bottom sheet --->
 
- <!--<div ng-controller="BottomSheetExample" class="md-padding bottomSheetdemoBasicUsage" ng-cloak="" ng-app="slackApp">
+ <div ng-controller="BottomSheetExample" class="md-padding bottomSheetdemoBasicUsage" ng-cloak="" ng-app="slackApp">
   
   <div class="bottom-sheet-demo inset" layout="row" layout-sm="column" layout-align="center">
     <md-button flex="50" class="md-primary md-raised" ng-click="showListBottomSheet()">Show Actions</md-button>   
@@ -1119,7 +1147,7 @@ function insertTextAtCursor(text) {
 </script>
 
 
-</div> -->
+</div> 
 
 
 </body>
