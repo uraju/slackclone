@@ -1010,11 +1010,10 @@ function insertTextAtCursor(text) {
 
     <md-toolbar class="md-hue-2">
       <div class="md-toolbar-tools">
-        <md-button class="md-icon-button" aria-label="Settings" ng-disabled="true">
-          <md-icon md-svg-icon="img/icons/menu.svg"></md-icon>
-        </md-button>
+        <md-icon md-svg-icon="avatar:svg-{{user.id + 1}}"></md-icon>
+        
         <h2>
-          <span>THE BOOTCAMP STACK CLONE</span>
+          <span> THE BOOTCAMP STACK CLONE</span>
         </h2>
         <md-progress-linear ng-if="waiting" md-mode="indeterminate"></md-progress-linear>
         <span flex=""></span>
