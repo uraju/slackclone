@@ -669,35 +669,7 @@ textarea.ta-bind {
 			};
   
 
-    $scope.showInvites = function(ev) {
-        $mdDialog.show({
-          controller: DialogController,
-          templateUrl: 'invite.tmpl.html',
-          parent: angular.element(document.body),
-          targetEvent: ev,
-          clickOutsideToClose:true,
-          fullscreen: $scope.customFullscreen // Only for -xs, -sm breakpoints.
-        })
-        .then(function(answer) {
-          // update the users!
-        }, function() {
-         // cancel the dialog
-        });
-      };
-
-       function DialogController($scope, $mdDialog) {
-        $scope.hide = function() {
-          $mdDialog.hide();
-        };
-
-        $scope.cancel = function() {
-          $mdDialog.cancel();
-        };
-
-        $scope.answer = function(answer) {
-          $mdDialog.hide(answer);
-        };
-      } 
+       
 
       $scope.changeChannel = function(find) {
            // this should actually change the channel using a retrieve.
@@ -904,6 +876,39 @@ textarea.ta-bind {
   };
 })
 
+.controller('InviteCtrl', function($scope, $mdDialog){
+
+    var self = this;
+
+    self.showInvites = function($event) {
+      $mdDialog.show({
+        controller: DialogController,
+        controllerAs: 'ctrl',
+        templateUrl: 'invite.tmpl.html',
+        parent: angular.element(document.body),
+        targetEvent: $event,
+        clickOutsideToClose:true
+      })
+    }
+
+
+    function DialogController($scope, $mdDialog) {
+        $scope.hide = function() {
+          $mdDialog.hide();
+        };
+
+        $scope.cancel = function() {
+          $mdDialog.cancel();
+        };
+
+        $scope.answer = function(answer) {
+          $mdDialog.hide(answer);
+        };
+      } 
+  })
+
+  
+
 .controller('TitleController', function($scope) {
   $scope.title = 'THE BOOTCAMP SLACK CLONE';
 });
@@ -1023,7 +1028,7 @@ function insertTextAtCursor(text) {
             Show Channels
           </md-button>
         
-          <md-button class="md-raised md-secondary" ng-click="showInvites()">
+          <md-button ng-controller="InviteCtrl as ctrl"  class="md-raised md-secondary" ng-click="ctrl.showInvites()">
             Invite Users
           </md-button>
 
