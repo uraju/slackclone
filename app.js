@@ -43,6 +43,11 @@ app.get('/rest/userinfo/:user', rest.getuserinfo);
 app.get('/rest/user/', rest.user);
 app.get('/upload/:channel/:filename', upload.upload); // change
 app.get('/download/:channel/:filename', upload.download);
+app.post('/rest/user/:userid/addChannel/:channelid', rest.addChannel);
+app.post('/rest/user/:userid/addNewChannel/:channelname', rest.addNewChannel);
+app.post('/rest/user/:userid/removeChannel/:channelid', rest.removeChannel);
+app.get('/rest/channel/', rest.channel);
+
 
 app.listen(3000, function () {
   console.log('Example app listening on port 3000!');
