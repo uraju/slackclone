@@ -830,8 +830,8 @@ function insertTextAtCursor(text) {
           DIRECT MESSAGES
           <md-divider></md-divider>         
            <md-list-item  ng-repeat="u in users">
-              <md-button ng-if="u.id !== user.id" ng-click="changePrivateChannel(user,u)"><md-icon md-svg-icon="avatar:svg-{{u.id + 1}}">
-                </md-icon> {{u.name}}</md-button> 
+              <md-button ng-click="changePrivateChannel(user,u)"><md-icon md-svg-icon="avatar:svg-{{u.id + 1}}">
+                </md-icon> {{u.name}} <span ng-if="u.id === user.id">(you)</span></md-button>
             </md-list-item>   
           </p>  
 
