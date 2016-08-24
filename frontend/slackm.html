@@ -114,7 +114,8 @@ textarea.ta-bind {
   <script src="dist/js/textAngular-sanitize.min.js" type="text/javascript"></script>
   <script src="dist/js/textAngular.min.js" type="text/javascript"></script>
   <script src="object-merge.js" type="text/javascript"></script>
-  
+  <script src="moment.min.js" type="text/javascript"></script>
+
   <script src="slack.js"></script>
 
   <!-- Angular Material Library -->
@@ -123,6 +124,8 @@ textarea.ta-bind {
 <!-- Your application bootstrap  -->
 
   <script>
+      moment().format();
+
       var slackApp = //angular.module('slackApp', ['ngRoute']);
             angular.module('slackApp',['ngMaterial', 'ngMessages', 'material.svgAssetsCache','ngRoute', 'textAngular'])
 
@@ -442,7 +445,7 @@ textarea.ta-bind {
            
               //$scope.channel = Slack.channel;
               if( fromPoll !== true)
-                  $scope.channel.messages.push({id:$scope.channel.messages.length,  "content":$scope.newMessage, user: Slack.user} );
+                  $scope.channel.messages.push({id:$scope.channel.messages.length,  "content":$scope.newMessage, timestamp: new Date().getTime(), user: Slack.user} );
               $scope.newMessage = "";
 
               console.log(  JSON.stringify($scope.channel));
@@ -507,6 +510,13 @@ textarea.ta-bind {
            
        };
 
+      $scope.asDate = function(t){
+          if(t.timestamp === undefined)
+              t.timestamp = new Date();
+          else
+            t.timestamp = new Date(t.timestamp);
+          return moment().calendar(t.timestamp);
+        }
 
       $scope.removeChannel= function (channelId){
             var index = $scope.user.channels.findIndex( function (item) { 
@@ -878,7 +888,7 @@ function insertTextAtCursor(text) {
                 <md-icon class="md-avatar-icon md-48"  md-svg-icon="avatar:svg-{{item.user.id + 1}}"></md-icon>
 
                 <div class="md-list-item-text" layout="column">
-                <div>{{ item.user.name }}:</div>
+                <div><b>{{ item.user.name }}</b>, {{asDate(item)}} says </div>
               <!--<p ng-click="goToPerson(item.user.name, $event)">--> 
 
               <div>
