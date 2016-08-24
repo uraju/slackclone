@@ -10,12 +10,21 @@
 	 <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:400,300">
  
 
-  <style>
+<style type="text/css">
+
+  #footer{
+    position:fixed;
+    height:30px;
+    bottom:5px;
+    left:5px;
+    right:5px;
+    margin-bottom:5px;
+}
 
 .ta-toolbar {
-	background-color: #F0F0F0;
-	padding: 10px 10px 5px;
-	margin-left: 0px; /* Override bootstrap */
+	background-color: #FFFFFF;
+	padding: 2px 2px 1px;
+	/*margin-left: 0px; Override bootstrap */
 	border: 1px solid #EEE;
 }
 
@@ -24,13 +33,21 @@
 }
 
 .ta-editor, .white-box {
-	padding: 10px;
+	padding: 2px;
+  min-width: 400px;
 	background-color: #FFF;
 	border: 1px solid #EEE;
 }
 
+.ta-scroll-window > .ta-bind {
+	height: auto;
+	min-height: 50px;
+	padding: 6px 12px;
+}
+
+
 textarea.ta-bind {
-	width: 100%;
+	width: 85%;
 }
 
 .listdemoListControls md-divider {
@@ -94,8 +111,9 @@ textarea.ta-bind {
   border-radius: 48px;
   border: 1px solid #ddd; }
 
-    </style>
+</style>
 </head>
+
 <body ng-app="slackApp">
   <!--
     Your HTML content here
@@ -282,7 +300,7 @@ textarea.ta-bind {
           $mdToast.show(
                       $mdToast.simple()
                         .textContent('Login Succesful!')
-                        .position('top right')
+                        .position('bottom left')
                         .hideDelay(3000)
                     );
          $scope.loggedin = true;
@@ -297,7 +315,7 @@ textarea.ta-bind {
          $mdToast.show(
                       $mdToast.simple()
                         .textContent('Login Fail!')
-                        .position('top right')
+                        .position('bottom left')
                         .hideDelay(3000)
                     );
          $scope.loggedin = false;
@@ -314,7 +332,7 @@ textarea.ta-bind {
       $mdToast.show(
                       $mdToast.simple()
                         .textContent('Logged Out!')
-                        .position('top right')
+                        .position('bottom left')
                         .hideDelay(3000)
                     );
        $rootScope.$broadcast('UserChangedEvent', null );   
@@ -482,7 +500,7 @@ textarea.ta-bind {
                     $mdToast.show(
                       $mdToast.simple()
                         .textContent('Message Saved!')
-                        .position('top right')
+                        .position('bottom left')
                         .hideDelay(3000)
                     );
                          
@@ -530,10 +548,10 @@ textarea.ta-bind {
        };
 
       $scope.asDate = function(t){
-          if(t.timestamp === undefined)
-              t.timestamp = new Date();
-          else
-            t.timestamp = new Date(t.timestamp);
+          // if(t.timestamp === undefined)
+          //     t.timestamp = new Date();
+          // else
+          //   t.timestamp = new Date(t.timestamp);
           return moment(t.timestamp).fromNow();
         }
 
@@ -881,7 +899,13 @@ textarea.ta-bind {
 
     var self = this;
 
+  
     self.showInvites = function($event) {
+       console.log("is scope available?");
+   console.log( $scope.channel );
+     
+   console.log($scope.user);
+
       $mdDialog.show({
         controller: DialogController,
         controllerAs: 'ctrl',
@@ -889,7 +913,7 @@ textarea.ta-bind {
         parent: angular.element(document.body),
         targetEvent: $event,
         clickOutsideToClose:true
-      })
+      }); 
     }
 
 
@@ -907,6 +931,13 @@ function DialogController ($timeout, $q, $scope, $mdDialog) {
     };
     self.finish = function($event) {
       $mdDialog.hide();
+       // this should invoke the channel update 
+       // get the current channel
+       console.log( $scope.channel );
+       // get the id
+       // then update the user
+       console.log($scope.user);
+
     };
 
     
@@ -1001,14 +1032,18 @@ function insertTextAtCursor(text) {
   </md-content>
 </div>
 
-<div ng-controller="ChannelDetailCtrl" layout="column" style="height: 1000px;" ng-cloak="" class="sidenavdemoCustomSidenav" ng-app="slackApp">
+<div ng-controller="ChannelDetailCtrl" layout="column" style="height: 750px;" ng-cloak="" class="sidenavdemoCustomSidenav" ng-app="slackApp">
 
   <section layout="row" flex="">
 
     <md-sidenav class="md-sidenav-left" md-component-id="left" md-disable-backdrop="" md-whiteframe="4"> 
 
+     
       <md-toolbar class="md-theme-indigo">
-        <h1 class="md-toolbar-tools">CHANNELS</h1>
+        <h1 class="md-toolbar-tools">CHANNELS</h1>  <md-button ng-click="toggleLeft()">
+          Close
+        </md-button>
+
       </md-toolbar>
 
       <md-content layout-margin="">
@@ -1048,9 +1083,7 @@ function insertTextAtCursor(text) {
           </md-input-container> 
           </p>
          
-        <md-button ng-click="toggleLeft()" class="md-accent">
-          Close
-        </md-button>
+        
       </md-content>
 
     </md-sidenav>
@@ -1124,6 +1157,7 @@ function insertTextAtCursor(text) {
             
             </md-list-item>
             
+            
           </md-list>
 
             
@@ -1140,22 +1174,23 @@ function insertTextAtCursor(text) {
 
               
   </section>
-
+<!--
   <md-content>
-    <md-subheader class="md-primary"> 
-         <md-icon  class="materials-icons">message</md-icon><md-button class="md-raised md-primary" ng-click="addMessage(false)"><b>ADD MESSAGE</b></md-button>      
-    </md-subheader>
-    <text-angular ng-model="newMessage"  
-    ta-toolbar="[['bold','italics','underline','strikeThrough','insertImage','insertLink','insertVideo']]"" name="editor" ta-text-editor-class="border-around" ta-html-editor-class="border-around"></text-angular>
-
+    
   </md-content>
 
-      
+      -->
+<div class="footer" style="height: 100px;">
+                  <md-icon  class="materials-icons">message</md-icon><md-button class="md-raised md-primary" ng-click="addMessage(false)"><b>ADD MESSAGE</b></md-button>      
+                
+                  <text-angular  ng-model="newMessage" max-length="200" 
+                  ta-toolbar="[['bold','italics','underline','strikeThrough','insertImage','insertLink','insertVideo']]"" name="editor" ta-text-editor-class="border-around" ta-html-editor-class="border-around"></text-angular>
+                  </div>
 
 </div>
 
 <!--- bottom sheet --->
-
+<!--
  <div ng-controller="BottomSheetExample" class="md-padding bottomSheetdemoBasicUsage" ng-cloak="" ng-app="slackApp">
   
   <div class="bottom-sheet-demo inset" layout="row" layout-sm="column" layout-align="center">
@@ -1189,7 +1224,7 @@ function insertTextAtCursor(text) {
 
 
 </div> 
-
+-->
 
 </body>
 </html>
