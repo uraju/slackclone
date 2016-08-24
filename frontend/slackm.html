@@ -185,7 +185,7 @@ textarea.ta-bind {
                       l.push( o.user.channels[i].id);
                     }
 
-                   $http.get( 'http://localhost:3000/rest/messages/' + l.join()).   
+                   $http.get( '/rest/messages/' + l.join()).   
                         success( function (data) {
                               console.log("channel data" + data);
                               o.channels = data;
@@ -196,13 +196,21 @@ textarea.ta-bind {
 
 
         o.channelCb = function( callback, channelId ){
-            $http.get( 'http://localhost:3000/rest/messages/' + channelId).   
+            $http.get( '/rest/messages/' + channelId).   
                         success( function (data) {
                               console.log("channel data:" + data[0].id);
                               callback(data);               
                         });   
 
         };
+
+       o.channelListCb = function( callback ){
+           $http.get( '/rest/channel/').
+                  success( function (data) {
+                        callback(data);
+              });
+
+       }
 
         
         o.user = {};
@@ -219,7 +227,7 @@ textarea.ta-bind {
        $scope.waiting = false;
        $scope.loggedin = Slack.loggedin;
         
-          Slack.userCb(function(data){
+       Slack.userCb(function(data){
             $scope.user = Slack.user; // fill in scope when done
                 },  function(data ){
 
@@ -237,6 +245,8 @@ textarea.ta-bind {
                 }, 
                 Slack.user.id 
             );
+
+
           
         
 
@@ -262,6 +272,13 @@ textarea.ta-bind {
       
       if( founduser != null )
         {
+          Slack.channelListCb(function (data)
+            {
+            $scope.channelList = data;
+            Slack.channelList = data;
+            }
+          );
+
           $mdToast.show(
                       $mdToast.simple()
                         .textContent('Login Succesful!')

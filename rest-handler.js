@@ -196,10 +196,10 @@ exports.getMessages = function (req, res) {
     console.log('get messages');
     
     //var channel =  mgr.createChannel("Team Channel");
-
-    
     mgr.retrieveChannelById(req.params.channel).then(
+   var userid = req.params.channel;
 
+    db.getChannelJSON(userid).then(
     (data) => {
 
         console.log("data" + data);
