@@ -876,6 +876,7 @@ textarea.ta-bind {
   };
 })
 
+// should move this into user controller
 .controller('InviteCtrl', function($scope, $mdDialog){
 
     var self = this;
@@ -892,17 +893,15 @@ textarea.ta-bind {
     }
 
 
+
 function DialogController ($timeout, $q, $scope, $mdDialog) {
     var self = this;
 
-    // list of `state` value/display objects
-    self.states        = loadAll();
+    self.users
+            = loadAll();
     self.querySearch   = querySearch;
 
-    // ******************************
-    // Template methods
-    // ******************************
-
+   
     self.cancel = function($event) {
       $mdDialog.cancel();
     };
@@ -910,21 +909,13 @@ function DialogController ($timeout, $q, $scope, $mdDialog) {
       $mdDialog.hide();
     };
 
-    // ******************************
-    // Internal methods
-    // ******************************
-
-    /**
-     * Search for states... use $timeout to simulate
-     * remote dataservice call.
-     */
+    
     function querySearch (query) {
-      return query ? self.states.filter( createFilterFor(query) ) : self.states;
+      return query ? self.users
+      .filter( createFilterFor(query) ) : self.users
+      ;
     }
 
-    /**
-     * Build `states` list of key/value pairs
-     */
     function loadAll() {
       var allUsers = 'Alice, Bob, Charles, David, Eliza';
 
