@@ -892,19 +892,64 @@ textarea.ta-bind {
     }
 
 
-    function DialogController($scope, $mdDialog) {
-        $scope.hide = function() {
-          $mdDialog.hide();
-        };
+function DialogController ($timeout, $q, $scope, $mdDialog) {
+    var self = this;
 
-        $scope.cancel = function() {
-          $mdDialog.cancel();
-        };
+    // list of `state` value/display objects
+    self.states        = loadAll();
+    self.querySearch   = querySearch;
 
-        $scope.answer = function(answer) {
-          $mdDialog.hide(answer);
+    // ******************************
+    // Template methods
+    // ******************************
+
+    self.cancel = function($event) {
+      $mdDialog.cancel();
+    };
+    self.finish = function($event) {
+      $mdDialog.hide();
+    };
+
+    // ******************************
+    // Internal methods
+    // ******************************
+
+    /**
+     * Search for states... use $timeout to simulate
+     * remote dataservice call.
+     */
+    function querySearch (query) {
+      return query ? self.states.filter( createFilterFor(query) ) : self.states;
+    }
+
+    /**
+     * Build `states` list of key/value pairs
+     */
+    function loadAll() {
+      var allUsers = 'Alice, Bob, Charles, David, Eliza';
+
+      return allUsers.split(/, +/g).map( function (u) {
+        return {
+          value: u.toLowerCase(),
+          display: u
         };
-      } 
+      });
+    }
+
+    /**
+     * Create filter function for a query string
+     */
+    function createFilterFor(query) {
+      var lowercaseQuery = angular.lowercase(query);
+
+      return function filterFn(state) {
+        return (state.value.indexOf(lowercaseQuery) === 0);
+      };
+
+    }
+  }
+
+
   })
 
   
