@@ -101,6 +101,106 @@ function updateChannel(userId, msg) {
     });
 }
 
+// Adding the channel to the user
+exports.addChannel = addChannel;
+function addChannel (userid, channelid) {
+    return new Promise((resolve, reject) => {
+    console.log('addChannel');
+    var content = userid;
+    var db = new sqlite3.Database('slack.db');
+	var sqlsel = "select info from user where id = " + userid;
+	console.log(sqlsel);
+	var user;
+		db.each(sqlsel,
+		function(err, row) {
+			user = JSON.parse(row.INFO);
+			var ch1 = JSON.parse('{"id": ' + channelid + '}');
+			user.channels.push(ch1);
+			console.log("User channels Info: " + JSON.stringify(user.channels));
+			
+		},
+		function(err) {
+			if(err) {
+				reject(err);
+			}
+			else {
+				var query = "UPDATE USER SET info = '"+ JSON.stringify(user) 
+					+ "'  WHERE ID = " + userid ;
+				console.log("Update SQL: " + query);
+				db.each(query,
+				function(err, row) {
+				}, function(err) {
+				if(err) {
+					reject(err);
+				}
+				else {
+					db.close();
+					resolve("Added successfully");
+					}
+				}
+			)};
+        });
+	});
+}
+//})}
+
+// updating the channel from the user table
+
+exports.removeChannel = removeChannel;
+function removeChannel (userid, channelid) {
+    return new Promise((resolve, reject) => {
+        console.log("channel id--------->" + channelid);
+    console.log('removeChannel');
+    var content = userid;
+    var db = new sqlite3.Database('slack.db');
+	var sqlsel = "select info from user where id = " + userid;
+	console.log(sqlsel);
+	var user;
+		db.each(sqlsel,
+		function(err, row) {
+			// loop thru and check id of the object to be removed
+			user = JSON.parse(row.INFO);
+			var nch = user.channels;
+			var nch1=[];
+			var idx;
+			var ch;
+			for(idx = 0; idx < nch.length; idx++) {
+				//console.log('channel : ' + JSON.parse(nch[idx]));
+				ch = nch[idx];
+				console.log('ch ready: ' + idx);
+				if (ch != undefined && ch.id != undefined && ch.id != channelid) {
+					nch1.push(nch[idx]);
+				}
+			}
+			user.channels = nch1;
+		},
+		function(err) {
+			if(err) {
+				reject(err);
+			}
+			else {
+				console.log("User channels Info: " + JSON.stringify(user.channels));
+				console.log("User channels Info: " + JSON.stringify(user));
+				var query = "UPDATE USER SET info = '"+ JSON.stringify(user) 
+					+ "'  WHERE ID = " + userid ;
+				console.log("Update SQL: " + query);
+				db.each(query,
+				function(err, row) {
+				}, function(err) {
+				if(err) {
+					reject(err);
+				}
+				else {
+					db.close();
+					resolve("Removed successfully");
+					}
+				}
+			)};
+        });
+	});
+}
+//})}
+
 
 
 /*
@@ -142,6 +242,87 @@ function addMessage(userId, msg) {
 */
 
 
+exports.addNewChannel = addNewChannel;
+function addNewChannel(channelname, userid) {
+    return new Promise((resolve, reject) => {
+		//TODO: get all list of channel, make sure channelname not duplicate
+		//
+		// insert into channel (stuff, name) values ('Channel 9', 'Channel 9');
+		// select max(id) as id from channel;
+		var db = new sqlite3.Database('slack.db');
+        var query = "insert into channel (stuff, name) values ('" + 
+		channelname + "', '" + channelname +"')";
+		console.log(query);
+		var channelid = 0;
+        db.each(query,
+            function(err, row) {
+				// aftet insert get the id of the channel
+				// may be need to update Stuff as json format to 
+				// show properly in channel screen
+				
+                query = "select max(id) as id from channel";
+            },
+            function(err) {
+                if(err) {
+                    reject(err);
+                }
+                else {
+					var channelid = '0';
+
+					query = "select max(id) as ID from channel";
+					console.log(query);
+					db.each(query,
+						function(err, row) {
+							// aftet insert get the id of the channel
+							//  need to update Stuff as json format too
+							// show properly in channel screen
+							console.log("select successfully");
+							channelid =JSON.stringify(row.ID);
+							console.log(channelid);
+							
+						},
+						function(err) {
+							if(err) {
+								reject(err);
+							}
+							else {
+					// stuff that works, copy of other channel
+					var stf= '{"id":'+ channelid +',"name":"Team Channel '+ channelid +'","description":"Team Channel channel '+ channelid +'","type":"team","team":{"id":0,"name":"undefined","members":[{"id":0,"name":"Alice","channels":[{"id":1,"name":"Alice","description":"Alice private channel","type":"private","messages":[],"globalId":0}]},{"id":2,"name":"Bob","channels":[{"id":3,"name":"Bob","description":"Bob private channel","type":"private","messages":[],"globalId":0}]},{"id":4,"name":"Charles","channels":[{"id":5,"name":"Charles","description":"Charles private channel","type":"private","messages":[],"globalId":0}]}]},"messages":[{"id":1,"content":"This is a test message1!","user":{"id":0,"name":"Alice","channels":[{"id":1,"name":"Alice","description":"Alice private channel","type":"private","messages":[],"globalId":0}]},"timestamp":1471006630698},{"id":2,"content":"This is a test message2!","user":{"id":2,"name":"Bob","channels":[{"id":3,"name":"Bob","description":"Bob private channel","type":"private","messages":[],"globalId":0}]},"timestamp":1471006630698},{"id":3,"content":"This is a test message3!","user":{"id":4,"name":"Charles","channels":[{"id":5,"name":"Charles","description":"Charles private channel","type":"private","messages":[],"globalId":0}]},"timestamp":1471006630698}],"globalId":4}';
+					// fix this below to get empty channel TODO: remove try catch in line 364 and 368 to see abend
+					//var stf= '{"id":'+ channelid +',"name":" '+ channelname +'","description":"Team Channel ' + channelname + ' ' + channelid +'","type":"team","team":{"id":0,"name":"undefined","members":[],"globalId":+ channelid}';
+					query = "update channel set stuff = '"  + stf;
+					query = query + "' where id = " + channelid;
+					console.log(query);
+					db.each(query,
+						function(err, row) {
+							// aftet insert get the id of the channel
+							// may be need to update Stuff as json format to 
+							// show properly in channel screen
+							
+						},
+						function(err) {
+							if(err) {
+								reject(err);
+							}
+							else {
+								addChannel (userid, channelid);
+								db.close();
+								resolve("Added Channel " + channelid);
+								//resolve(JSON.stringify(followers));
+								
+							}
+					});								
+								//db.close();
+								//resolve("Added Channel");
+								//resolve(JSON.stringify(followers));
+							}
+					});
+					
+                    //resolve(JSON.stringify(followers));
+                }
+        });
+    });
+}
 
 exports.getFollowersJSON = getFollowersJSON;
 function getFollowersJSON(userId) {
@@ -180,8 +361,12 @@ function getChannelJSON(userId) {
         db.each(query,
             function(err, row) {
              //var channel = row.STUFF;
-            channel.push(JSON.parse(row.STUFF));
-            console.log(row.STUFF);
+			 try {
+				channel.push(JSON.parse(row.STUFF));
+				console.log(row.STUFF);
+			 } catch (err) {
+				console.log('DBERROR: ' + err) 
+			 }
             },
             function(err) {
                 if(err) {
@@ -361,6 +546,39 @@ function getUserInfoJSON(userId) {
         });
     });
 }
+
+// start :get channel list
+
+exports.getChannelList = getChannelList;
+function getChannelList() {
+    return new Promise((resolve, reject) => {
+    console.log('get channel list');
+       var db = new sqlite3.Database('slack.db');
+       var query = "SELECT * FROM CHANNEL";
+        var channelList = [];
+        db.each(query,
+            function(err, row) {
+                var channel = { id: row.ID, Channel: row.NAME};
+               channelList.push(channel);
+            },
+            function(err) {
+                if(err) {
+                    reject(err);
+                }
+                else {
+                    db.close();
+                    resolve(JSON.stringify(channelList));
+                }
+        });
+    });
+}
+
+
+
+
+//End
+
+
 
 //initdb();
 //var db = new sqlite3.Database('slack.db');
