@@ -515,7 +515,7 @@ textarea.ta-bind {
               t.timestamp = new Date();
           else
             t.timestamp = new Date(t.timestamp);
-          return moment().calendar(t.timestamp);
+          return moment(t.timestamp).fromNow();
         }
 
       $scope.removeChannel= function (channelId){
