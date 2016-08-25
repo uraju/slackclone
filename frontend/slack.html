@@ -166,8 +166,35 @@
                   }).
                   success( function (data) {
                    $scope.users =  data;
-                   //  console.log("data", JSON.stringify($scope.users));         
+                  // console.log("data", JSON.stringify($scope.users));         
               });
+
+               $scope.addNewUser = function(name,form) {
+                 var users = $scope.users;
+                 var ch = JSON.parse('{"name": "' + name + '"}' );
+                 console.log("users" + users);
+                 console.log("name" + ch);
+                 users.push(ch);
+			           $scope.showMsgs = false;
+                    if (form.$invalid) {
+                        $scope.showMsgs = true;
+                  } else {
+                      $scope.showMsgs = false;  
+                 
+                  
+                    $http({
+                        method: 'post',
+                        url: '/rest/user/'+name,
+                        headers: {'Content-Type': "application/json"}
+                      }).
+                        success( function (data) {
+                         
+                          console.log("Added succesffully");
+                              
+                    });
+                  }
+                  $scope.name= '';
+                  };
             });
 
 
@@ -198,6 +225,7 @@
                    $scope.userdet = Slack.user; 
  
               });
+     
             });
   
     // End here
@@ -341,21 +369,7 @@
 					console.log ("viewChannelCtrl addChannel completed! -------"  + data);
 					if (data == 'Added successfully') {
 						nchannels.push(ch);
-						/*
-						$http({
-						method: 'get',
-						url: '/rest/userinfo/'  +$scope.user.id ,
-						headers: {
-						  'Content-Type': "application/json"
-						},
-						}).
-						success( function (data) {
-						  console.log ("Got user data -------"  + data);
-						  $scope.user =  data;
-						  Slack.user =  data ; 
-						});
-						*/
-						//window.location.reload();
+						
 					}				   
                   
                 });
@@ -387,20 +401,6 @@
                     }
                   }
 				  
-                  /*   $http({
-                        method: 'get',
-                        url: '/rest/userinfo/'  +$scope.user.id ,
-                        headers: {
-                          'Content-Type': "application/json"
-                        },
-                        }).
-                        success( function (data) {
-                          console.log ("Got user data -------"  + data);
-                          $scope.user =  data;
-                          Slack.user =  data ; 
-                        });
-                    //window.location.reload();
-					*/
                   }	
                 });
 				   			   
@@ -441,36 +441,7 @@
 							console.log('viewChannelCtrl addNewChannel nchn: ' + nchn);
 						}
 				   }
-				   /*
-				   if (data == 'Added Channel') {
-					// console.log("add new channelS" +data);
-					$http({
-                        method: 'get',
-                       url: '/rest/channel/',
-                        headers: {
-                          'Content-Type': "application/json"
-                        },
-                        }).
-                        success( function (data) {
-                          $scope.channelsList =  data;
-				                  Slack.channelsList =  data;
-                        });
-
-				            	//	window.location.reload();
-					}
-					$http({
-                        method: 'get',
-                        url: '/rest/userinfo/'  +$scope.user.id ,
-                        headers: {
-                          'Content-Type': "application/json"
-                        },
-                        }).
-                        success( function (data) {
-                          console.log ("Got user data -------"  + data);
-                          $scope.user =  data;
-                          Slack.user =  data ; 
-                        });
-					*/
+				 
 				   });
 				   
                $scope.name = '';
@@ -487,103 +458,17 @@
 				}
 				return false;
 			};
+       // Add new user to the user table
+   	
               
      });
 
- /*
- slackApp
-    .controller('addChannelCtrl', function ($scope, $http, $routeParams, Slack){
-     
-		$scope.user = Slack.user;
-      $scope.channel = $routeParams.channelName;
-      console.log("addChannelCtrl ---------------!!!!1" + Slack.channelsList);
-      
-      $scope.channelsList =  Slack.channelsList;
-      $scope.boxShow1 = true;
-      $scope.boxShow = true;     
-		$scope.addChannel = function(message) {
-					 console.log("addChannelCtrl Log " + message);
-                      $scope.messages = [];
-                      $scope.messages.push(message); 
-                      console.log("addChannelCtrl messages " + $scope.messages);
-					  $http({
-                  method: 'post',
-                  url: '/rest/user/'+ $scope.user.id +'/addChannel/'+message,
-                  headers: {'Content-Type': "application/json"},
-				  data: JSON.stringify($scope.channel)}).
-                  success(function (data) {
-                   console.log ("addChannelCtrl addChannel completed! -------"  + data);});
-          };	  
-/*
 
-			$scope.addNewChannel = function(message) {
-					 console.log("addNewChannel Log " + message);
-                      $scope.messages = [];
-                      $scope.messages.push(message); 
-                      console.log("addChannelCtrl addNewChannel messages " + $scope.messages);
-					  $http({
-                  method: 'post',
-                  url: '/rest/user/'+ $scope.user.id +'/addNewChannel/'+message,
-                  headers: {'Content-Type': "application/json"},
-				  data: JSON.stringify($scope.channel)}).
-                  success(function (data) {
-                   console.log ("addChannelCtrl addNewChannel completed! -------"  + data);});
-           };	 
-           */ 
-/*
-			$scope.isAddChannel = function(message) {
-				var pathname = window.location.pathname;
-				var url      = window.location.href; 
-				console.log ("pathname " +pathname);
-				console.log("url " + url);
-				var parts = url.split('/');
-				console.log("parts length " + parts.length);
-				if (parts.length > 5) {
-					console.log("AddChannel ID" + parts[5]);
-					if (parts[5] == message) {
-						return true;
-					}
-				}
-				return false;
-			};
-     
-    });
-    */
-      
-     /*  $scope.addChannel = function(message) {
-           $scope.messages = [];
-          $scope.messages.push(message); 
-           console.log("messages" + $scope.messages);
-
-              
-            };
-  
-    });
-*/
-
-//End
-
-/*
-function isAddChannel1(channelid) {
-    var pathname = window.location.pathname;
-    var url      = window.location.href; 
-    console.log ("pathname" +pathname);
-    console.log("url" + url);
-    var parts = url.split('/');
-	if (parts.length > 3) {
-		console.log("AddChannel Part" + parts[3]);
-		if (parts[3] == channelid) {
-			return true;
-		}
-	}
-	return false;
-}
-*/
     </script>
 </head>
 
 <body>
-  <h1 class="md-display-3">The Slack Clone</h1>
+  <h1 class="md-display-3">The Slack Clone - Administration</h1>
 
   <div class="container">
 

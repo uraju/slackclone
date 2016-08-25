@@ -46,6 +46,7 @@ app.get('/download/:channel/:filename', upload.download);
 app.post('/rest/user/:userid/addChannel/:channelid', rest.addChannel);
 app.post('/rest/user/:userid/addNewChannel/:channelname', rest.addNewChannel);
 app.post('/rest/user/:userid/removeChannel/:channelid', rest.removeChannel);
+app.post('/rest/user/:name', rest.addUser);
 app.get('/rest/channel/', rest.channel);
 
 

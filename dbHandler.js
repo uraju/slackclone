@@ -573,6 +573,90 @@ function getChannelList() {
     });
 }
 
+// adding the new user to the user table
+exports.addNewUser = addNewUser;
+function addNewUser(name) {
+    console.log("dbHandlerName"+name);
+    return new Promise((resolve, reject) => {
+		// select max(id) as id from user;
+		var db = new sqlite3.Database('slack.db');
+        var query = "insert into user (name, info) values ('" + 
+		name + "', '" + name +"')";
+		console.log(query);
+		var userid = 0;
+        db.each(query,
+            function(err, row) {
+				// aftet insert get the id of the channel
+				// may be need to update Stuff as json format to 
+				// show properly in channel screen
+				
+                query = "select max(id) as id from user";
+            },
+            function(err) {
+                if(err) {
+                    reject(err);
+                }
+                else {
+					var userid = '0';
+
+					query = "select max(id) as ID from user";
+					console.log(query);
+					db.each(query,
+						function(err, row) {
+							// aftet insert get the id of the channel
+							//  need to update Stuff as json format too
+							// show properly in channel screen
+							console.log("select successfully");
+							userid =JSON.stringify(row.ID);
+							console.log(userid);
+							
+						},
+						function(err) {
+							if(err) {
+								reject(err);
+							}
+							else {
+					// stuff that works, copy of other channel
+					var stf= '{"id":+userid,"name":name,"channels":[{"id":0},{"id":1},{"id":2},{"id":3},{"id":4},{"id":5}]}';
+                    
+					var stf= '{"id":'+ userid +',"name":" '+ name  +'","channels":[{"id":0},{"id":1},{"id":2},{"id":3},{"id":4},{"id":5}]}';
+					query = "update user set info = '"  + stf;
+					query = query + "' where id = " + userid;
+					console.log(query);
+					db.each(query,
+						function(err, row) {
+							// aftet insert get the id of the channel
+							// may be need to update Stuff as json format to 
+							// show properly in channel screen
+							
+						},
+						function(err) {
+							if(err) {
+								reject(err);
+							}
+							else {
+								//addChannel (userid, channelid);
+								db.close();
+								resolve("Added user " + userid);
+								//resolve(JSON.stringify(followers));
+								
+							}
+					});								
+								//db.close();
+								//resolve("Added Channel");
+								//resolve(JSON.stringify(followers));
+							}
+					});
+					
+                    //resolve(JSON.stringify(followers));
+                }
+        });
+    });
+}
+
+
+
+
 
 
 

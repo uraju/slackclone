@@ -128,7 +128,20 @@ exports.channel = function (req, res) {
 
 //End
 
+// Adding the new user to the user table
 
+exports.addUser = function (req, res) {
+ var parts = req.path.split('/');
+  console.log('userName'+ parts[3]);
+  var username = parts[3];
+  console.log('username: ' + username);
+   db.addNewUser(username).then(
+        (data) => {
+            res.send(data);
+        }).catch((err) => {
+            console.log('db error = ' + err);
+        }
+    );}
 
 
 /*
@@ -197,9 +210,7 @@ exports.getMessages = function (req, res) {
     
     //var channel =  mgr.createChannel("Team Channel");
     mgr.retrieveChannelById(req.params.channel).then(
-   var userid = req.params.channel;
-
-    db.getChannelJSON(userid).then(
+  
     (data) => {
 
         console.log("data" + data);

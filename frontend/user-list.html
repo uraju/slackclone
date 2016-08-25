@@ -3,3 +3,30 @@
     <a href ="#/user/{{user.id}} ">{{user.name}}</a>
   </li>
 </ul>
+	<form  name="form"  novalidate>  
+ <table>
+    <tr>
+        <td>
+        <label class="control-label">User</label>     
+        </td>
+      </tr>
+       <tr>
+        <td>
+          <input name="name" type="text"  ng-model="name" placeholder="User" style="width: 400px;height:40px" required />
+           </td>
+           <td>
+            <button type="submit" class="btn btn-raised" ng-click="addNewUser(name,form)"> Add User </button>
+           </td>
+       </tr>
+          <tr>
+          <td>  
+             <div ng-show="showMsgs && form.$invalid" >
+                    <span style="color:red" ng-show="showMsgs && form.name.$error.required">
+                      User Name  Required
+              </span>
+               </div>
+          </td>           
+           
+        </tr>        
+</table>
+	</form>
