@@ -872,7 +872,11 @@ textarea.ta-bind {
 
     // End here
 
-  
+.config(function($mdThemingProvider) {
+  $mdThemingProvider.theme('default')
+    .primaryPalette('deep-purple')
+    .accentPalette('green');
+})  
   
 .config(function($mdIconProvider) {
   $mdIconProvider
