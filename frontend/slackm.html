@@ -526,7 +526,7 @@ textarea.ta-bind {
               // need to update http!!!
                $http({
                   method: 'POST',
-                  url: 'http://localhost:3000/rest/sendMessage/' + $scope.channel.id,
+                  url: '/rest/sendMessage/' + $scope.channel.id,
                   headers: {
                     'Content-Type': "application/json" 
                   },
@@ -875,7 +875,7 @@ textarea.ta-bind {
 .config(function($mdThemingProvider) {
   $mdThemingProvider.theme('default')
     .primaryPalette('deep-purple')
-    .accentPalette('green');
+    .accentPalette('teal');
 })  
   
 .config(function($mdIconProvider) {
@@ -1039,7 +1039,9 @@ function DialogController ($scope, $timeout, $q,  $mdDialog) {
       }, {
           title: 'Enhancement Request',
           content: '<h2>Enhancement Request</h2<b>Title:</b>  <br/><b>Description:</b> <br/><b>Priority:</b> <br/> <b>Classification:</b> <br/>'
-      }],
+      }
+      
+      ],
       content_css: [
           '//fast.fonts.net/cssapi/e6dc9b99-64fe-4292-ad98-6974f93cd2a2.css',
           '//www.tinymce.com/css/codepen.min.css'
