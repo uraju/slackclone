@@ -1,0 +1,35 @@
+<md-dialog aria-label="Invite Users to Channel" ng-cloak>
+  <md-toolbar>
+    <div class="md-toolbar-tools">
+      <h2>Invite Users</h2>
+      <span flex></span>
+      <md-button class="md-icon-button" ng-click="ctrl.cancel()">
+        <md-icon md-svg-src="img/icons/ic_close_24px.svg" aria-label="Close dialog"></md-icon>
+      </md-button>
+    </div>
+  </md-toolbar>
+  <md-dialog-content>
+    <div class="md-dialog-content">
+      <form ng-submit="$event.preventDefault()">
+        <p>Search for users to invite.</p>
+        <md-autocomplete
+            md-selected-item="ctrl.selectedItem"
+            md-search-text="ctrl.searchText"
+            md-items="item in ctrl.querySearch(ctrl.searchText)"
+            md-item-text="item.display"
+            md-min-length="0"
+            placeholder="Which user do you want to invite?">
+          <md-item-template>
+            <span md-highlight-text="ctrl.searchText" md-highlight-flags="^i">{{item.display}}</span>
+          </md-item-template>
+          <md-not-found>
+            No users "{{ctrl.searchText}}" were found.
+          </md-not-found>
+        </md-autocomplete>
+      </form>
+    </div>
+  </md-dialog-content>
+  <md-dialog-actions>
+    <md-button aria-label="Finished" ng-click="ctrl.finish($event)">Finished</md-button>
+  </md-dialog-actions>
+</md-dialog>
