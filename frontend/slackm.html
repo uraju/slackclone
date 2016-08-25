@@ -8,17 +8,34 @@
    <link rel="stylesheet" href="dist/css/textAngular.css">
    <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css">
 	 <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:400,300">
+   <link rel="stylesheet" href="bower_components/angular-notification-icons/dist/angular-notification-icons.css" />
  
-
 <style type="text/css">
 
   #footer{
     position:fixed;
-    height:30px;
+    height:200px;
     bottom:5px;
     left:5px;
     right:5px;
     margin-bottom:5px;
+}
+
+.angular-notifications-icon {
+  right: -5px;
+  top: -5px;
+  border-radius: 50%;
+  text-align: center;
+  padding-left: 5px;
+  padding-right: 5px;
+  padding-top: 1px;
+  min-width: 15px;
+  height: 15px;
+  background: red;
+  color: white;
+  cursor: default;
+  font-weight: bolder;
+  font-size: 0.5em;
 }
 
 .ta-toolbar {
@@ -136,6 +153,7 @@ textarea.ta-bind {
   <!--script src="//cdn.tinymce.com/4/tinymce.min.js"></script-->
   <script type="text/javascript" src="bower_components/tinymce-dist/tinymce.js"></script>
   <script type="text/javascript" src="bower_components/angular-ui-tinymce/src/tinymce.js"></script>
+  <script src="bower_components/angular-notification-icons/dist/angular-notification-icons.min.js"></script>
   
 
 
@@ -148,7 +166,7 @@ textarea.ta-bind {
       moment().format();
 
       var slackApp = //angular.module('slackApp', ['ngRoute']);
-            angular.module('slackApp',['ngMaterial', 'ngMessages', 'material.svgAssetsCache','ngRoute', 'textAngular', 'ui.tinymce'])
+            angular.module('slackApp',['ngMaterial', 'ngMessages', 'material.svgAssetsCache','ngRoute', 'textAngular', 'ui.tinymce', 'angular-notification-icons', 'ngAnimate'])
 
       slackApp.config(function($routeProvider) {
         $routeProvider.
@@ -247,6 +265,13 @@ textarea.ta-bind {
 
        $scope.waiting = false;
        $scope.loggedin = Slack.loggedin;
+
+       $scope.notification = 0;
+
+      $rootScope.$on("new-message", function (event, user) {$scope.notification = $scope.notification + 1;});
+
+      $rootScope.$on("send-message", function (event, user) {$scope.notification = 0;});
+
         
        Slack.userCb(function(data){
             $scope.user = Slack.user; // fill in scope when done
@@ -267,8 +292,7 @@ textarea.ta-bind {
                 Slack.user.id 
             );
 
-
-          
+  
         
 
 
@@ -458,14 +482,20 @@ textarea.ta-bind {
                           Slack.channel = merge['merged'];
                           $scope.channel =  angular.copy(Slack.channel, $scope.channel); 
                           $scope.addMessage(true);
+                          $rootScope.$broadcast('send-message');
                           console.log("channel merged.");
                         } else if (needToSave){
                           angular.copy($scope.channel, Slack.channel); // save history
+                          $rootScope.$broadcast('send-message');
                           $scope.addMessage(true);
                           console.log("channel saved.");
+                          
+                          // broadcast to notification to turn off notification
                         } else if (needToUpdate){
                           Slack.channel = channel[0];
                           angular.copy(Slack.channel, $scope.channel); // update from source
+                          // broadcast to notification!
+                          $rootScope.$broadcast('new-message');
                           console.log("channel updated");
                         } else
                           console.log("channel not changed.");
@@ -572,36 +602,29 @@ textarea.ta-bind {
 
 
 
-       $scope.addChannel = function (channelId){
-            var index = $scope.user.channels.findIndex( function (item) { 
-                   return item.id === channelId;
-               } );
+//        $scope.addChannel = function (channelId){
+//             var index = $scope.user.channels.findIndex( function (item) { 
+//                    return item.id === channelId;
+//                } );
 
-            if( index === -1)
-                $scope.user.channels.push({id: channelId});
-            // need to save user
-       };
+//             if( index === -1)
+//                 $scope.user.channels.push({id: channelId});
+//             // need to save user
+//        };
 
 
  // Adding existing channel to the user           
-		$scope.TEMPaddChannel = function(channelid) {
-			console.log("viewChannelCtrl addChannel to user, channel id  " + channelid);
-			//$scope.messages = [];
-			//$scope.messages.push(message); 
-			//console.log("viewChannelCtrl messages " + $scope.messages);
-			var nchannels = $scope.user.channels;
-			var ch = JSON.parse('{"id": "' + channelid + '"}' );
+		$scope.addChannel = function(userid, channelid) {
 			$http({
                 method: 'post',
-                url: '/rest/user/'+ $scope.user.id +'/addChannel/'+channelid,
+                url: '/rest/user/'+ userid +'/addChannel/'+channelid,
                 headers: {'Content-Type': "application/json"},
 				//data: JSON.stringify($scope.channel)}).
 				data: JSON.stringify($scope.user)}).
                 success(function (data) {
 					console.log ("viewChannelCtrl addChannel completed! -------"  + data);
 					if (data == 'Added successfully') {
-						nchannels.push(ch);
-						
+            // should alert
 					}				   
                   
                 });
@@ -901,16 +924,19 @@ textarea.ta-bind {
 })
 
 // should move this into user controller
-.controller('InviteCtrl', function($scope, $mdDialog){
+.controller('InviteCtrl', function($scope, $mdDialog, Slack){
+  var inviteScope = $scope;
 
     var self = this;
 
   
     self.showInvites = function($event) {
-       console.log("is scope available?");
+      
    console.log( $scope.channel );
      
    console.log($scope.user);
+   $scope.users = Slack.users;
+   
 
       $mdDialog.show({
         controller: DialogController,
@@ -924,7 +950,7 @@ textarea.ta-bind {
 
 
 
-function DialogController ($timeout, $q, $scope, $mdDialog) {
+function DialogController ($scope, $timeout, $q,  $mdDialog) {
     var self = this;
 
     self.users
@@ -939,11 +965,17 @@ function DialogController ($timeout, $q, $scope, $mdDialog) {
       $mdDialog.hide();
        // this should invoke the channel update 
        // get the current channel
-       console.log( $scope.channel );
+       //console.log( $scope );
+       console.log(inviteScope.channel);
        // get the id
        // then update the user
-       console.log($scope.user);
-
+      //  console.log(inviteScope.user);
+      //  console.log(inviteScope.users);
+      //  console.log($scope.ctrl.searchText);
+      var found = inviteScope.users.find(function(u){ return $scope.ctrl.searchText === u.name });
+      // console.log( found );
+      // invoke channel update
+      inviteScope.$parent.addChannel(found.id, inviteScope.channel.id);
     };
 
     
@@ -954,9 +986,10 @@ function DialogController ($timeout, $q, $scope, $mdDialog) {
     }
 
     function loadAll() {
-      var allUsers = 'Alice, Bob, Charles, David, Eliza';
 
-      return allUsers.split(/, +/g).map( function (u) {
+      var allUsers = inviteScope.users.map( function(i){return i.name;});
+      
+      return allUsers.map( function (u) { //split(/, +/g)
         return {
           value: u.toLowerCase(),
           display: u
@@ -970,8 +1003,8 @@ function DialogController ($timeout, $q, $scope, $mdDialog) {
     function createFilterFor(query) {
       var lowercaseQuery = angular.lowercase(query);
 
-      return function filterFn(state) {
-        return (state.value.indexOf(lowercaseQuery) === 0);
+      return function filterFn(s) {
+        return (s.value.indexOf(lowercaseQuery) === 0);
       };
 
     }
@@ -998,10 +1031,10 @@ function DialogController ($timeout, $q, $scope, $mdDialog) {
 
       templates: [{
           title: 'Issue Request',
-          content: 'Title: <br/> Description: <br/> Justification: <br/>'
+          content: '<h2>Issue Request</h2><br/><b>Title:</b> <br/><b>Description:</b> <br/><b>Justification:</b> <br/>'
       }, {
           title: 'Enhancement Request',
-          content: 'Title: <br/> Description: <br/> Priority: <br/> Classification: <br/>'
+          content: '<h2>Enhancement Request</h2<b>Title:</b>  <br/><b>Description:</b> <br/><b>Priority:</b> <br/> <b>Classification:</b> <br/>'
       }],
       content_css: [
           '//fast.fonts.net/cssapi/e6dc9b99-64fe-4292-ad98-6974f93cd2a2.css',
@@ -1053,7 +1086,14 @@ function insertTextAtCursor(text) {
         <md-progress-linear ng-if="waiting" md-mode="indeterminate"></md-progress-linear>
         <span flex=""></span>
         
-       
+        <div class="custom-style" id="custom-style">
+        
+        <notification-icon  animation="bounce"  count="notification">
+          <i class="fa fa-envelope-o"></i>
+        </notification-icon>
+        </div>
+      
+
         <md-button class="md-icon-button" ng-click="showPrompt($event)">
            <div ng-switch="loggedin">
               <md-icon  class="materials-icons" ng-switch-when="true">lock_open</md-icon>
@@ -1088,7 +1128,7 @@ function insertTextAtCursor(text) {
         <p>
           CHANNELS ({{channels.length}})
           <md-divider></md-divider>
-          <md-list-item ng-repeat="item in channels track by $index"><md-button  ng-click="changeChannel(item.id)">{{item.name}} ({{item.messages.length}})</md-button>
+          <md-list-item ng-repeat="item in channels track by $index"><md-button  ng-click="changeChannel(item.id)">#{{item.name}} ({{item.messages.length}})</md-button>
            <md-button class="md-warn md-icon-button" ng-click="removeChannelConfirm(item.id)">
                 <md-icon class="materials-icons" >delete_forever</md-icon>
           </md-button>
@@ -1102,8 +1142,8 @@ function insertTextAtCursor(text) {
           DIRECT MESSAGES
           <md-divider></md-divider>         
            <md-list-item  ng-repeat="u in users">
-              <md-button ng-click="changePrivateChannel(user,u)"><md-icon md-svg-icon="avatar:svg-{{u.id + 1}}">
-                </md-icon> {{u.name}} <span ng-if="u.id === user.id">(you)</span></md-button>
+              <md-button ng-click="changePrivateChannel(user,u)">
+                </md-icon>@{{u.name}} <span ng-if="u.id === user.id">(you)</span> <md-icon md-svg-icon="avatar:svg-{{u.id + 1}}"></md-button>
             </md-list-item>   
           </p>  
 
@@ -1156,7 +1196,7 @@ function insertTextAtCursor(text) {
                 <md-icon class="md-avatar-icon md-48"  md-svg-icon="avatar:svg-{{item.user.id + 1}}"></md-icon>
 
                 <div class="md-list-item-text" layout="column">
-                <div><b>{{ item.user.name }}</b>, {{asDate(item)}} says </div>
+                <div><b>{{ item.user.name }}</b> <i>{{asDate(item)}}</i> </div>
               <!--<p ng-click="goToPerson(item.user.name, $event)">--> 
 
               <div>
@@ -1214,7 +1254,7 @@ function insertTextAtCursor(text) {
   </md-content>
 
       -->
-<div class="footer" style="height: 100px;">
+<div id="footer" style="height: 200px;">
                   <md-icon  class="materials-icons">message</md-icon><md-button class="md-raised md-primary" ng-click="addMessage(false)"><b>ADD MESSAGE</b></md-button>
     <form method="post">
     <textarea  ui-tinymce="tinymceOptions"   ng-controller="RichTextCtrl"  ng-model="$parent.newMessage"></textarea>

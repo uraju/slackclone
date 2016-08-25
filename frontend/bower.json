@@ -19,5 +19,8 @@
   ],
   "devDependencies": {
     "angular-ui-tinymce": "~0.0.16"
+  },
+  "dependencies": {
+    "angular-notification-icons": "^0.4.3"
   }
 }
