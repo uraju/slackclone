@@ -136,33 +136,7 @@ textarea.ta-bind {
   <!--script src="//cdn.tinymce.com/4/tinymce.min.js"></script-->
   <script type="text/javascript" src="bower_components/tinymce-dist/tinymce.js"></script>
   <script type="text/javascript" src="bower_components/angular-ui-tinymce/src/tinymce.js"></script>
-  <!--script>tinymce.init({
-      selector: "textarea",
-      height: 50,
-      plugins: [
-          "advlist autolink autosave link image lists charmap print preview hr anchor pagebreak spellchecker",
-          "searchreplace wordcount visualblocks visualchars code fullscreen insertdatetime media nonbreaking",
-          "table contextmenu directionality emoticons template textcolor paste fullpage textcolor colorpicker textpattern"
-      ],
-
-      toolbar1: "bold italic underline strikethrough | formatselect fontselect fontsizeselect ",
-      toolbar2: "cut copy paste | bullist numlist | blockquote | undo redo | link unlink image media | insertdatetime table hr | forecolor backcolor| charmap emoticons ",
-
-      menubar: false,
-      toolbar_items_size: 'small',
-
-      templates: [{
-          title: 'Test template 1',
-          content: 'Test 1'
-      }, {
-          title: 'Test template 2',
-          content: 'Test 2'
-      }],
-      content_css: [
-          '//fast.fonts.net/cssapi/e6dc9b99-64fe-4292-ad98-6974f93cd2a2.css',
-          '//www.tinymce.com/css/codepen.min.css'
-      ]
-  });</script-->
+  
 
 
   <!-- Angular Material Library -->
@@ -1016,8 +990,8 @@ function DialogController ($timeout, $q, $scope, $mdDialog) {
           "table contextmenu directionality emoticons template textcolor paste fullpage textcolor colorpicker textpattern"
       ],
 
-      toolbar1: "bold italic underline strikethrough | formatselect fontselect fontsizeselect ",
-      toolbar2: "cut copy paste | bullist numlist | blockquote | undo redo | link unlink image media | insertdatetime table hr | forecolor backcolor| charmap emoticons ",
+      toolbar1: "bold italic underline strikethrough | formatselect fontselect fontsizeselect | forecolor backcolor ",
+      toolbar2: "cut copy paste | bullist numlist | blockquote | undo redo | link unlink image media | charmap emoticons | template ",
 
       menubar: false,
       toolbar_items_size: 'small',
@@ -1092,7 +1066,7 @@ function insertTextAtCursor(text) {
   </md-content>
 </div>
 
-<div ng-controller="ChannelDetailCtrl" layout="column" style="height: 750px;" ng-cloak="" class="sidenavdemoCustomSidenav" ng-app="slackApp">
+<div ng-controller="ChannelDetailCtrl" layout="column" style="height: 700px;" ng-cloak="" class="sidenavdemoCustomSidenav" ng-app="slackApp">
 
   <section layout="row" flex="">
 
