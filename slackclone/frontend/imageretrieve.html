@@ -1,0 +1,66 @@
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <title>Image Retriever</title>
+
+    <!-- Bootstrap -->
+    
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <link rel="stylesheet" href="./dist/css/bootstrap.css" >
+
+    <!-- Optional theme -->
+	<link rel="stylesheet" href="./dist/css/bootstrap-theme.css" >
+    <link href="./dist/css/lightbox.css" rel="stylesheet">
+
+  <link href="./dist/css/bootstrap-material-design.css" rel="stylesheet">
+  <link href="./dist/css/ripples.min.css" rel="stylesheet">
+
+
+  </head>
+
+  <body>
+
+
+
+    <div class="container">
+
+    <div class="jumbotron">
+    <h1>Person Image Retriever</h1>
+
+	<select id="person">
+	    <option value="Alice">Alice</option>
+	    <option value="Bob">Bob</option>
+	    <option value="Carol">Carol</option>
+	    <option value="David">David</option>
+    </select>
+	<button type="button" class="btn btn-default"  onclick="loadImages()">
+	  <span class="glyphicon glyphicon-search" aria-hidden="true"></span> Retrieve Images
+	</button>
+    </div>
+
+    <div id="success" class="alert alert-success hide" role="alert">Well Done!</div>
+	
+	
+	<div id="content" ></div>
+    
+	<script type="text/javascript" src="load.js" ></script>
+
+ <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <!-- Latest compiled and minified JavaScript -->
+	<script src="./dist/js/bootstrap.js"></script>
+
+	<script src="./dist/js/lightbox.js"></script>
+  </body>
+</html>

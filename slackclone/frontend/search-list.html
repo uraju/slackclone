@@ -1,0 +1,10 @@
+<input type="text" ng-model="searchText"/><button ng-click="search()" >Search</button>
+ 
+<p>Search Results</p>
+
+<ul>
+  <li ng-repeat="item in messages | filter:{content:searchText}"><a ng-href="#/message/{{item.id}}">{{item.content}}</a>
+
+
+  </li>
+</ul>
