@@ -1,0 +1,524 @@
+<html ng-app="slackApp">
+
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Angular Material style sheet 
+  <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/angular_material/1.1.0-rc2/angular-material.min.css">
+-->
+  <title>The Slack Clone</title>
+  <link rel="stylesheet" href="./dist/css/dark-bootstrap.min.css">
+<!--  try this dark thyme
+  <link rel="stylesheet" href="./dist/css/bootstrap.min.css">
+-->
+<!--
+  <link href="./dist/css/bootstrap-material-design.css" rel="stylesheet">
+-->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.8/angular.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.8/angular-route.min.js"></script>
+
+
+  <script src="https://cdn.jsdelivr.net/lodash/4.15.0/lodash.min.js"></script>
+  
+
+  <!-- Angular Material Library -->
+  <script src="http://ajax.googleapis.com/ajax/libs/angular_material/1.1.0-rc2/angular-material.min.js"></script>
+
+  <script>
+  //var showList;
+  var slackApp
+     = angular.module('slackApp', ['ngRoute']);
+
+      slackApp.config(function($routeProvider) {
+        $routeProvider.
+          when('/', {
+            templateUrl: 'message-list.html',
+            controller: 'MessageListCtrl'
+          }).
+           when('/user', {
+            templateUrl: 'user-list.html',
+            controller: 'userListCtrl'
+          }).
+          when('/user/:user', {
+            templateUrl: 'user-detail.html',
+            controller: 'userDetailCtrl'
+          }).
+        
+          when('/channels', {
+            templateUrl: 'channel-list.html',
+            controller: 'ChannelListCtrl'
+          }).
+          when('/channel/:channel', {
+            templateUrl: 'channel-detail.html',
+            controller: 'ChannelDetailCtrl'
+          }).
+          when('/message/:messageId', {
+            templateUrl: 'message-detail.html',
+            controller: 'MessageDetailCtrl'
+          }).
+          when('/search', {
+            templateUrl: 'search-list.html',
+            controller: 'SearchListCtrl'
+          }).
+          when('/search/:search', {
+            templateUrl: 'search-list.html',
+            controller: 'SearchListCtrl'
+          }).
+          when('/cart', {
+            templateUrl: 'cart.html',
+            controller: 'CartCtrl'
+          }).
+         
+           when('/channellist', {
+            templateUrl: 'addChannel.html',
+            controller: 'viewChannelCtrl',
+          }).
+         /* 
+         when('/addchannel/:channelid', {
+            templateUrl: 'addChannel.html',
+            controller: 'addChannelCtrl'
+          }).
+          */
+            otherwise({
+            redirectTo: '/'
+          });
+      });
+
+      // Create the factory that share the Fact
+     
+    
+
+     
+      slackApp
+      .factory('Slack', function($http){
+        var o = {};
+        
+        o.userCb = function(callback, callback2, userid){
+          $http.get( '/rest/userinfo/'+ userid).
+        // $http.get( 'user.json').
+             success( function (data) {
+                  o.user = data;
+                  callback(data);   
+                  var l = [];
+                
+                  for( var i in o.user.channels)
+                    {
+                       console.log("data" + o.user.channels) ;
+                       console.log("i"+i);
+                      console.log("---------->"+o.user.channels[i]);
+                      l.push( o.user.channels[i].id);
+                       console.log("ID------------->" + o.user.channels[i].id);
+                    }
+                   
+                 $http.get( '/rest/messages/' + l.join()).    
+                        success( function (data) {
+                              console.log("channel data" + data);
+                              o.channels = data;
+                              //console.log("channel data" +JSON.stringify(data));
+                              callback2(o.channels);               
+                        });           
+             });
+          };
+
+        
+     o.user = {id: 1};
+      //  o.user = {};
+        o.messages =  [];
+        o.channels = [];
+        return o;
+      });
+
+//user details start here
+
+   slackApp
+   .controller('userDetailCtrl', function ($scope,$http,Slack){
+     var pathname = window.location.pathname;
+     var url      = window.location.href; 
+    console.log ("pathname" +pathname);
+    console.log("url" + url);
+    var parts = url.split('/');
+    var userid = parts[5];
+    console.log(userid);
+     $http({
+       
+                  method: 'get',
+                  url: '/rest/userinfo/'  +userid ,
+                  headers: {
+                    'Content-Type': "application/json"
+                  },
+                  }).
+                  success( function (data) {
+                    $scope.userInfo =  data;
+                   Slack.user =  $scope.userInfo ; 
+                   $scope.userdet = Slack.user; 
+                   // console.log("user" + JSON.stringify(Slack.user));   
+                  //console.log("userDetails" + JSON.stringify(Slack.user));   
+                  // console.log("datccccccccca", JSON.stringify( $scope.userdet));   
+ 
+              });
+            });
+  
+    // End here
+
+      slackApp
+    .controller('MessageListCtrl', function ($scope, $http, Slack){
+          Slack.userCb(function(data){
+            $scope.user = Slack.user; // fill in scope when done
+                },  function(data ){
+
+                console.log(data);
+
+                var messages= [];
+                for( var msg in data )
+                  {
+                  messages = messages.concat( data[msg].messages );
+                  }
+                Slack.messages = messages;
+                $scope.messages = messages;  
+                Slack.channels = data;
+                $scope.channels = Slack.channels; // fill in scope when done
+                }, Slack.user.id
+           
+            );} 
+                
+            );
+
+
+ //user list start here
+
+   slackApp
+   .controller('userListCtrl', function ($scope,$http){
+     $http({
+                  method: 'get',
+                  url: '/rest/user/',
+                  headers: {
+                    'Content-Type': "application/json"
+                  },
+                  }).
+                  success( function (data) {
+                   $scope.users =  data;
+                  // console.log("data", JSON.stringify($scope.users));         
+              });
+
+               $scope.addNewUser = function(name,form) {
+                    $scope.showMsgs = false;
+                    if (form.$invalid) {
+                        $scope.showMsgs = true;
+                  } else {
+                      $scope.showMsgs = false;  
+                 
+                  
+                    $http({
+                        method: 'post',
+                        url: '/rest/user/'+name,
+                        headers: {'Content-Type': "application/json"}
+                      }).
+                        success( function (data) {
+                         var users = $scope.users;
+                        var ch = JSON.parse('{"name": "' + name + '"}' );
+                        console.log("users" + users);
+                        console.log("name" + ch);
+                        users.push(ch);
+                       console.log("Added succesffully");
+                              
+                    });
+                  }
+                  $scope.name= '';
+                  };
+            });
+
+
+    // End here
+
+ //user details start here
+
+   slackApp
+   .controller('UserDetailCtrl', function ($scope,$http,Slack){
+     var pathname = window.location.pathname;
+     var url      = window.location.href; 
+    console.log ("pathname" +pathname);
+    console.log("url" + url);
+    var parts = url.split('/');
+    var userid = parts[5];
+    console.log(userid);
+     $http({
+       
+                  method: 'get',
+                  url: '/rest/userinfo/'  +userid ,
+                  headers: {
+                    'Content-Type': "application/json"
+                  },
+                  }).
+                  success( function (data) {
+                    $scope.userInfo =  data;
+                   Slack.user =  $scope.userInfo ; 
+                   $scope.userdet = Slack.user; 
+ 
+              });
+     
+            });
+  
+    // End here
+
+
+    slackApp
+    .controller('ChannelListCtrl', function ($scope,  Slack){
+
+        $scope.channels = Slack.channels;
+      });
+
+
+      slackApp
+    .controller('ChannelDetailCtrl', function ($scope, $routeParams, $http, Slack){
+
+        var find =  parseInt($routeParams.channel);
+
+        console.log(find);
+
+        var channel = Slack.channels.find( function (item) { 
+                   return item.id === find;
+               } );
+
+         console.log(channel);
+
+        if( channel != undefined ){
+        var index = channel.messages;
+        
+//         Slack.messages.filter( function (item) { 
+//                    console.log(Slack.messages);
+//                    console.log(find);
+//                    return item.channel.indexOf(find) != -1;
+//                } );
+
+     
+        $scope.channelItems = index; 
+
+        $scope.members = channel.team.members;
+
+        $scope.team = channel.team;
+
+        
+        $scope.channel = channel;
+
+        }
+
+        $scope.addMessage = function() {
+           
+              index.push({id:index.length,  "content":$scope.newMessage, user: Slack.user} );
+              $scope.newMessage = "";
+
+              console.log(  JSON.stringify($scope.channel));
+              
+              // what channel was edited??
+              // need to update http!!!
+               $http({
+                  method: 'POST',
+                  url: 'http://localhost:3000/rest/sendMessage/' + $scope.channel.id,
+                  headers: {
+                    'Content-Type': "application/json"
+                  },
+                  data: JSON.stringify($scope.channel)  // why zero????
+                  }).
+                  success( function (data) {
+                    alert("message saved!");         
+                    });
+            };
+
+
+      });
+
+       slackApp
+      .controller('SearchListCtrl', function ($scope, $routeParams, Slack){
+
+         //$scope.search = $routeParams.search;
+
+         $scope.search = function( event) {
+          if( !event || event.keyCode === 13 ) {
+              console.log($scope.searchText);
+              
+             };            
+           }
+           
+         $scope.messages = Slack.messages;
+
+       });
+
+
+
+      slackApp
+    .controller('MessageDetailCtrl', function ($scope, $routeParams, Slack){
+      
+        var find = parseInt( $routeParams.messageId);
+
+        var index = Slack.messages.find( function (item) { 
+                   return item.id === find;
+               } );
+               
+        $scope.keys = Object.keys(index);
+        $scope.messages = index; //Shop.items.shop[index];
+
+         
+      });
+      
+// Get the channel from the Channel table
+
+      slackApp
+    .controller('viewChannelCtrl', function ($scope,$http,Slack){
+		$scope.user = Slack.user;
+      console.log ("get user first for -------"  + $scope.user.id);
+        $scope.boxShow1 = true;
+        $scope.boxShow = false;
+            $http({
+                  method: 'get',
+                  url: '/rest/channel/',
+                  headers: {
+                    'Content-Type': "application/json"
+                  },
+                  }).
+                  success( function (data) {
+                   $scope.channelsList =  data;
+				           Slack.channelsList =  data;
+                       
+              });
+
+   // Adding existing channel to the user           
+		$scope.addChannel = function(channelid) {
+			console.log("viewChannelCtrl addChannel to user, channel id  " + channelid);
+			//$scope.messages = [];
+			//$scope.messages.push(message); 
+			//console.log("viewChannelCtrl messages " + $scope.messages);
+			var nchannels = $scope.user.channels;
+			var ch = JSON.parse('{"id": "' + channelid + '"}' );
+			$http({
+                method: 'post',
+                url: '/rest/user/'+ $scope.user.id +'/addChannel/'+channelid,
+                headers: {'Content-Type': "application/json"},
+				//data: JSON.stringify($scope.channel)}).
+				data: JSON.stringify($scope.user)}).
+                success(function (data) {
+					console.log ("viewChannelCtrl addChannel completed! -------"  + data);
+					if (data == 'Added successfully') {
+						nchannels.push(ch);
+						
+					}				   
+                  
+                });
+ 				 
+      };	  
+
+    // updating the channel from the user table
+		$scope.removeChannel = function(channelid) {
+			console.log("viewChannelCtrl removeChannel to user, channel id  " + channelid);
+			//$scope.messages = [];
+			//$scope.messages.push(message); 
+			//console.log("viewChannelCtrl messages " + $scope.messages);
+			var nchannels = $scope.user.channels;
+			var ch = JSON.parse('{"id": "' + channelid + '"}' );
+			//console.log("viewChannelCtrl removeChannel messages " + $scope.messages);
+			$http({
+                  method: 'post',
+                  url: '/rest/user/'+ $scope.user.id +'/removeChannel/'+channelid,
+                  headers: {'Content-Type': "application/json"},
+				  data: JSON.stringify($scope.channel)}).
+                  success(function (data) {
+                   console.log ("viewChannelCtrl removeChannel completed! -------"  + data);
+                  if (data == 'Removed successfully') {
+				            	var idx;
+					
+                  for(idx = 0; idx < nchannels.length; idx++) {
+                    if (nchannels[idx].id == channelid){
+                      nchannels.splice(idx,1);
+                    }
+                  }
+				  
+                  }	
+                });
+				   			   
+           };	  
+
+		// add new channel to the Channel table and update user table
+
+			$scope.addNewChannel = function(message,form) {
+					 console.log("Log form" + form);
+           $scope.showMsgs = false;
+              if (form.$invalid) {
+                 $scope.showMsgs = true;
+            } else {
+                $scope.showMsgs = false;  
+            $scope.messages = [];
+            $scope.messages.push(message); 
+            console.log("viewChannelCtrl addNewChannel messages " + $scope.messages);
+					  $http({
+                  method: 'post',
+                  url: '/rest/user/'+ $scope.user.id +'/addNewChannel/'+message,
+                  headers: {'Content-Type': "application/json"},
+				  data: JSON.stringify($scope.channel)}).
+                  success(function (data) {
+                   console.log ("viewChannelCtrl addNewChannel completed! -------"  + data);
+				   var res = data.split(" ");
+				   if (res.length >= 3) { // Added Channel channelid
+						if(res[0] == 'Added'){
+							var nchannels = $scope.user.channels;
+							var ch = JSON.parse('{"id": "' + res[2] + '"}' );
+							nchannels.push(ch);		//add to user channel list
+							var schn = '{"id": "' + res[2] + '", "Channel": "' + message + '"}';
+							console.log('viewChannelCtrl addNewChannel post: ' + schn);
+							var chn = JSON.parse(schn);  // note only id and Channel is usable
+							var nchn = $scope.channelsList;
+							nchn.push(chn);
+							$scope.channelsList = nchn;
+							Slack.channelsList = nchn;
+							console.log('viewChannelCtrl addNewChannel nchn: ' + nchn);
+						}
+				   }
+				 
+				   });
+				   
+               $scope.name = '';
+                 }
+        };	  
+			$scope.checkForUserChannel = function(channelid) {
+				var channels = Slack.user.channels;
+			//	console.log ("channelid " + channelid);
+				var idx;
+				for (idx = 0; idx < channels.length; idx++) {
+					if (channels[idx].id == channelid) {
+						return true;
+					}
+				}
+				return false;
+			};
+       // Add new user to the user table
+   	
+              
+     });
+
+
+    </script>
+</head>
+
+<body>
+<nav class="navbar navbar-default">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="#">
+        SSA Training: Slack Clone Administration
+      </a>
+    </div>
+  </div>
+</nav>
+<div class="container">
+	<ul class="nav nav-pills">
+		<li role="presentation"><a ng-href="#/user">Users</a></li>
+		<li role="presentation"><a href="#/channels">Channels</a></li>
+		<li role="presentation"><a href="#/">Messages</a></li>
+		<li role="presentation"><a href="#/search">Search</a></li>
+		<li role="presentation"><a href="#/channellist">Add Channel</a></li>
+	</ul>
+
+    <div ng-view></div>
+
+</div>
+  
+</body>
+
+</html>

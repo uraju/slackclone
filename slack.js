@@ -33,151 +33,146 @@ Timestamp
 */
 
 var _ = require('lodash');
-var db =  require('./dbHandler.js');
+var db =  require('./dbHandler.js');
 
 class User
 {
-    constructor(id, name,pwd,avatar,channels){
-         this.id = id;
-         this.name = name;
-         this.pwd = pwd;
-         this.avatar = avatar;
-         //if( channels == undefined)
-            this.channels = [];
-        // this.channels = channels;         
+    constructor(id, name,pwd,avatar,channels){
+         this.id = id;
+         this.name = name;
+         this.pwd = pwd;
+         this.avatar = avatar;
+         //if( channels == undefined)
+            this.channels = [];
+        // this.channels = channels;         
 
-    }  
+    }  
 
-    
+    
 }
 
 
 class Manager {
 
-    constructor(){
-        this.channels = [];
-        this.users = [];
-        this.teams = [];
-        this.globalId = 0;
+    constructor(){
+        this.channels = [];
+        this.users = [];
+        this.teams = [];
+        this.globalId = 0;
 
-    }  
+    }  
 
 
 
-    createNewUser(name){
-        var user = new User(this.globalId++, name);
-        var channel = new Channel(this.globalId++, user.name, user.name + ' private channel', 'private');
-        user.channels.push(channel);
-        this.users.push(user);
-        this.channels.push(channel);
-        return user;
-    };
+    createNewUser(name){
+        var user = new User(this.globalId++, name);
+        var channel = new Channel(this.globalId++, user.name, user.name + ' private channel', 'private');
+        user.channels.push(channel);
+        this.users.push(user);
+        this.channels.push(channel);
+        return user;
+    };
 
-    getPrivateChannel( user ){
-        return _.find(user.channels, e => e.name == user.name   );        
-    }    
+    getPrivateChannel( user ){
+        return _.find(user.channels, e => e.name == user.name   );        
+    }    
 
-    retrieveChannelById(channelId){
-        
-        return db.getChannelJSON(channelId);
+    retrieveChannelById(channelId){
+        
+        return db.getChannelJSON(channelId);
 
-        
-        /*
-       return db.getChannelJSON(channelId).then(
-          
-                (data) => {
-                    console.log("data" + data);
-                }).catch((err) => {
-                    console.log('db error = ' + err);
-                }
-            );   
+        
+        /*
+       return db.getChannelJSON(channelId).then(
+          
+                (data) => {
+                    console.log("data" + data);
+                }).catch((err) => {
+                    console.log('db error = ' + err);
+                }
+            );   
 */
 
-       //return _.find(this.channels, e => e.id == channelId   );      
-    }
-    /*
-    updateChannel(message){
-                return db.updateChannelJSON(channelId,message);        
-       
-    }
-*/
-    updateChannel(channelId, content){
+       //return _.find(this.channels, e => e.id == channelId   );      
+    }
 
-        return db.updateChannel(channelId, content);
-    }
+    updateChannel(channelId, content){
 
-    createChannel(name){
-        var channel = new Channel(this.globalId++, name, name + ' channel', 'team');
-        this.channels.push(channel);
-        return channel;
-    } 
+        return db.updateChannel(channelId, content);
+    }
+
+    createChannel(name){
+        var channel = new Channel(this.globalId++, name, name + ' channel', 'team');
+        this.channels.push(channel);
+        return channel;
+    } 
 
 }
 
 class Channel {
-    constructor (id,name,description,type,team){
-        this.id = id;
-        this.name = name;       
-        this.description= description;
-        this.type = type;
-         this.team = team;
-        this.messages = [];
-        this.globalId = 0;
-    }
+    constructor (id,name,description,type,team){
+        this.id = id;
+        this.name = name;       
+        this.description= description;
+        this.type = type;
+         this.team = team;
+        this.messages = [];
+        this.globalId = 0;
+    }
 
-    addUser(user)
-    {
-    if( this.team === undefined ){
-            this.team = new Team(this.globalId++, "" + this.global );
-        }
-        this.team.members.push(user);
+    addUser(user)
+    {
+    if( this.team === undefined ){
+            this.team = new Team(this.globalId++, "" + this.global );
+        }
+        this.team.members.push(user);
 
-    }
+    }
 
-    addTeam(team){
-        this.team = team;
-    }
+    addTeam(team){
+        this.team = team;
+    }
 
-    addMessage(user, m)
-    {
-        var message = new Message(this.globalId++, m, user, this, new Date().getTime());
-        this.messages.push(message);
-        return message;
-    }
+    addMessage(user, m)
+    {
+        var message = new Message(this.globalId++, m, user, this, new Date().getTime());
+        this.messages.push(message);
+        return message;
+    }
 
-    showUsers()
-    {
-        return this.team.members;
-    }
+    showUsers()
+    {
+        return this.team.members;
+    }
 
 
 
-    showMessages()
-    {
-        return this.messages;
-    }
+    showMessages()
+    {
+        return this.messages;
+    }
 }
 
 
 
 class Message{
-    constructor(id,content,user,channel,timestamp){
-        this.id = id;
-        this.content = content;
-        this.user = user;
-        this.channel = Channel;
-        this.timestamp = timestamp;
+    constructor(id,content,user,channel,timestamp){
+        this.id = id;
+        this.content = content;
+        this.user = user;
+        this.channel = Channel;
+        this.timestamp = timestamp;
 
-    }
+    }
 
 }
 
 class Team{
-    constructor(id,name){
-        this.id = id;
-        this.name = name;
-        this.members = [];
-       }
+    constructor(id,name){
+        this.id = id;
+        this.name = name;
+        this.members = [];
+       }
 
 }
 

@@ -1,9 +1,15 @@
-<h1>{{item.name}}</h1>
-
-     <ul>
-         <li ng-repeat="field in keys  ">
+<hr/>  
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">{{item.name}}</h3>
+  </div>
+	<div class="panel-body">
+		<ul>
+			<li ng-repeat="field in keys  ">
              {{field}} : {{item[field]}}
-         </li>
-     </ul>
-
-<button  ng-click="addMessage()">Reply</button>
+			</li>
+		</ul>
+	<button class="btn btn-default  btn-raised"  ng-click="addMessage()">Reply</button>
+	</div>
+</div>
+<hr/>

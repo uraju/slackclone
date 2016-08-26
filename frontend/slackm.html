@@ -8,14 +8,40 @@
    <link rel="stylesheet" href="dist/css/textAngular.css">
    <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css">
 	 <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:400,300">
+   <link rel="stylesheet" href="bower_components/angular-notification-icons/dist/angular-notification-icons.css" />
  
+<style type="text/css">
 
-  <style>
+  #footer{
+    position:fixed;
+    height:200px;
+    bottom:5px;
+    left:5px;
+    right:5px;
+    margin-bottom:5px;
+}
+
+.angular-notifications-icon {
+  right: -5px;
+  top: -5px;
+  border-radius: 50%;
+  text-align: center;
+  padding-left: 5px;
+  padding-right: 5px;
+  padding-top: 1px;
+  min-width: 15px;
+  height: 15px;
+  background: red;
+  color: white;
+  cursor: default;
+  font-weight: bolder;
+  font-size: 0.5em;
+}
 
 .ta-toolbar {
-	background-color: #F0F0F0;
-	padding: 10px 10px 5px;
-	margin-left: 0px; /* Override bootstrap */
+	background-color: #FFFFFF;
+	padding: 2px 2px 1px;
+	/*margin-left: 0px; Override bootstrap */
 	border: 1px solid #EEE;
 }
 
@@ -24,13 +50,21 @@
 }
 
 .ta-editor, .white-box {
-	padding: 10px;
+	padding: 2px;
+  min-width: 400px;
 	background-color: #FFF;
 	border: 1px solid #EEE;
 }
 
+.ta-scroll-window > .ta-bind {
+	height: auto;
+	min-height: 50px;
+	padding: 6px 12px;
+}
+
+
 textarea.ta-bind {
-	width: 100%;
+	width: 85%;
 }
 
 .listdemoListControls md-divider {
@@ -94,8 +128,9 @@ textarea.ta-bind {
   border-radius: 48px;
   border: 1px solid #ddd; }
 
-    </style>
+</style>
 </head>
+
 <body ng-app="slackApp">
   <!--
     Your HTML content here
@@ -115,8 +150,12 @@ textarea.ta-bind {
   <script src="dist/js/textAngular.min.js" type="text/javascript"></script>
   <script src="object-merge.js" type="text/javascript"></script>
   <script src="moment.min.js" type="text/javascript"></script>
+  <!--script src="//cdn.tinymce.com/4/tinymce.min.js"></script-->
+  <script type="text/javascript" src="bower_components/tinymce-dist/tinymce.js"></script>
+  <script type="text/javascript" src="bower_components/angular-ui-tinymce/src/tinymce.js"></script>
+  <script src="bower_components/angular-notification-icons/dist/angular-notification-icons.min.js"></script>
+  
 
-  <script src="slack.js"></script>
 
   <!-- Angular Material Library -->
   <script src="https://cdn.gitcdn.link/cdn/angular/bower-material/v1.1.0/angular-material.js"></script>
@@ -127,7 +166,7 @@ textarea.ta-bind {
       moment().format();
 
       var slackApp = //angular.module('slackApp', ['ngRoute']);
-            angular.module('slackApp',['ngMaterial', 'ngMessages', 'material.svgAssetsCache','ngRoute', 'textAngular'])
+            angular.module('slackApp',['ngMaterial', 'ngMessages', 'material.svgAssetsCache','ngRoute', 'textAngular', 'ui.tinymce', 'angular-notification-icons', 'ngAnimate'])
 
       slackApp.config(function($routeProvider) {
         $routeProvider.
@@ -185,7 +224,7 @@ textarea.ta-bind {
                       l.push( o.user.channels[i].id);
                     }
 
-                   $http.get( 'http://localhost:3000/rest/messages/' + l.join()).   
+                   $http.get( '/rest/messages/' + l.join()).   
                         success( function (data) {
                               console.log("channel data" + data);
                               o.channels = data;
@@ -196,13 +235,21 @@ textarea.ta-bind {
 
 
         o.channelCb = function( callback, channelId ){
-            $http.get( 'http://localhost:3000/rest/messages/' + channelId).   
+            $http.get( '/rest/messages/' + channelId).   
                         success( function (data) {
                               console.log("channel data:" + data[0].id);
                               callback(data);               
                         });   
 
         };
+
+       o.channelListCb = function( callback ){
+           $http.get( '/rest/channel/').
+                  success( function (data) {
+                        callback(data);
+              });
+
+       }
 
         
         o.user = {};
@@ -218,8 +265,15 @@ textarea.ta-bind {
 
        $scope.waiting = false;
        $scope.loggedin = Slack.loggedin;
+
+       $scope.notification = 0;
+
+      $rootScope.$on("new-message", function (event, user) {$scope.notification = $scope.notification + 1;});
+
+      $rootScope.$on("send-message", function (event, user) {$scope.notification = 0;});
+
         
-          Slack.userCb(function(data){
+       Slack.userCb(function(data){
             $scope.user = Slack.user; // fill in scope when done
                 },  function(data ){
 
@@ -237,7 +291,8 @@ textarea.ta-bind {
                 }, 
                 Slack.user.id 
             );
-          
+
+  
         
 
 
@@ -262,10 +317,17 @@ textarea.ta-bind {
       
       if( founduser != null )
         {
+          Slack.channelListCb(function (data)
+            {
+            $scope.channelList = data;
+            Slack.channelList = data;
+            }
+          );
+
           $mdToast.show(
                       $mdToast.simple()
                         .textContent('Login Succesful!')
-                        .position('top right')
+                        .position('bottom left')
                         .hideDelay(3000)
                     );
          $scope.loggedin = true;
@@ -280,7 +342,7 @@ textarea.ta-bind {
          $mdToast.show(
                       $mdToast.simple()
                         .textContent('Login Fail!')
-                        .position('top right')
+                        .position('bottom left')
                         .hideDelay(3000)
                     );
          $scope.loggedin = false;
@@ -297,7 +359,7 @@ textarea.ta-bind {
       $mdToast.show(
                       $mdToast.simple()
                         .textContent('Logged Out!')
-                        .position('top right')
+                        .position('bottom left')
                         .hideDelay(3000)
                     );
        $rootScope.$broadcast('UserChangedEvent', null );   
@@ -330,7 +392,7 @@ textarea.ta-bind {
 
 
       slackApp
-    .controller('ChannelDetailCtrl', function ($scope, $routeParams, $http,  $timeout, $mdSidenav, $mdDialog,  $mdToast, $rootScope, Slack){
+    .controller('ChannelDetailCtrl', function ($scope, $routeParams, $http,  $timeout, $mdSidenav, $mdDialog, $mdToast, $rootScope, Slack){
 
         var find =  parseInt($routeParams.channel);
 
@@ -365,6 +427,9 @@ textarea.ta-bind {
         $scope.channels = Slack.channels;
 
         $scope.user = Slack.user;
+
+
+
 
 
         }
@@ -417,14 +482,20 @@ textarea.ta-bind {
                           Slack.channel = merge['merged'];
                           $scope.channel =  angular.copy(Slack.channel, $scope.channel); 
                           $scope.addMessage(true);
+                          $rootScope.$broadcast('send-message');
                           console.log("channel merged.");
                         } else if (needToSave){
                           angular.copy($scope.channel, Slack.channel); // save history
+                          $rootScope.$broadcast('send-message');
                           $scope.addMessage(true);
                           console.log("channel saved.");
+                          
+                          // broadcast to notification to turn off notification
                         } else if (needToUpdate){
                           Slack.channel = channel[0];
                           angular.copy(Slack.channel, $scope.channel); // update from source
+                          // broadcast to notification!
+                          $rootScope.$broadcast('new-message');
                           console.log("channel updated");
                         } else
                           console.log("channel not changed.");
@@ -439,6 +510,7 @@ textarea.ta-bind {
                 poll();
                 }, 5000);
         };     
+        
         poll();      
 
         $scope.addMessage = function(fromPoll) {
@@ -454,7 +526,7 @@ textarea.ta-bind {
               // need to update http!!!
                $http({
                   method: 'POST',
-                  url: 'http://localhost:3000/rest/sendMessage/' + $scope.channel.id,
+                  url: '/rest/sendMessage/' + $scope.channel.id,
                   headers: {
                     'Content-Type': "application/json" 
                   },
@@ -464,7 +536,7 @@ textarea.ta-bind {
                     $mdToast.show(
                       $mdToast.simple()
                         .textContent('Message Saved!')
-                        .position('top right')
+                        .position('bottom left')
                         .hideDelay(3000)
                     );
                          
@@ -500,9 +572,10 @@ textarea.ta-bind {
                $mdToast.show(
                       $mdToast.simple()
                         .textContent('Channel Removed!')
-                        .position('top right')
+                        .position('top left')
                         .hideDelay(3000)
                     );
+               
             }, function() {
               // growl?
             });
@@ -511,34 +584,139 @@ textarea.ta-bind {
        };
 
       $scope.asDate = function(t){
-          if(t.timestamp === undefined)
-              t.timestamp = new Date();
-          else
-            t.timestamp = new Date(t.timestamp);
+          // if(t.timestamp === undefined)
+          //     t.timestamp = new Date();
+          // else
+          //   t.timestamp = new Date(t.timestamp);
           return moment(t.timestamp).fromNow();
         }
 
-      $scope.removeChannel= function (channelId){
-            var index = $scope.user.channels.findIndex( function (item) { 
-                   return item.id === channelId;
-               } );
+//       $scope.removeChannel= function (channelId){
+//             var index = $scope.user.channels.findIndex( function (item) { 
+//                    return item.id === channelId;
+//                } );
 
-            $scope.user.channels.splice(index, 1);
-            // need to save user
-       };
+//             $scope.user.channels.splice(index, 1);
+//             // need to save user
+//        };
 
 
 
-       $scope.addChannel = function (channelId){
-            var index = $scope.user.channels.findIndex( function (item) { 
-                   return item.id === channelId;
-               } );
+//        $scope.addChannel = function (channelId){
+//             var index = $scope.user.channels.findIndex( function (item) { 
+//                    return item.id === channelId;
+//                } );
 
-            if( index === -1)
-                $scope.user.channels.push({id: channelId});
-            // need to save user
-       };
+//             if( index === -1)
+//                 $scope.user.channels.push({id: channelId});
+//             // need to save user
+//        };
 
+
+ // Adding existing channel to the user           
+		$scope.addChannel = function(userid, channelid) {
+			$http({
+                method: 'post',
+                url: '/rest/user/'+ userid +'/addChannel/'+channelid,
+                headers: {'Content-Type': "application/json"},
+				//data: JSON.stringify($scope.channel)}).
+				data: JSON.stringify($scope.user)}).
+                success(function (data) {
+					console.log ("viewChannelCtrl addChannel completed! -------"  + data);
+					if (data == 'Added successfully') {
+            // should alert
+					}				   
+                  
+                });
+ 				 
+      };	  
+
+    // updating the channel from the user table
+		$scope.removeChannel = function(channelid) {
+			$http({
+                  method: 'post',
+                  url: '/rest/user/'+ $scope.user.id +'/removeChannel/'+channelid,
+                  headers: {'Content-Type': "application/json"},
+				          data: JSON.stringify($scope.channel)}).
+                  success(function (data) {
+                 
+                      var index = $scope.user.channels.findIndex( function (item) { 
+                            return item.id === channelid;
+                          } );
+
+                       $scope.user.channels.splice(index, 1);
+                       console.log(index);
+ 
+                       index = $scope.channels.findIndex( function (item) { 
+                            return item.id === channelid;
+                          } );
+                       console.log(index);
+                       
+                       $scope.channels.splice(index, 1);
+                       Slack.channels = $scope.channels;
+                       $scope.channel = $scope.channels[0];
+                     
+                });
+				   			   
+           };	  
+
+		// add new channel to the Channel table and update user table
+
+			$scope.TEMPaddNewChannel = function(message,form) {
+					 console.log("Log form" + form);
+           $scope.showMsgs = false;
+              if (form.$invalid) {
+                 $scope.showMsgs = true;
+            } else {
+                $scope.showMsgs = false;  
+            $scope.messages = [];
+            $scope.messages.push(message); 
+            console.log("viewChannelCtrl addNewChannel messages " + $scope.messages);
+					  $http({
+                  method: 'post',
+                  url: '/rest/user/'+ $scope.user.id +'/addNewChannel/'+message,
+                  headers: {'Content-Type': "application/json"},
+				  data: JSON.stringify($scope.channel)}).
+                  success(function (data) {
+                   console.log ("viewChannelCtrl addNewChannel completed! -------"  + data);
+				   var res = data.split(" ");
+				   if (res.length >= 3) { // Added Channel channelid
+						if(res[0] == 'Added'){
+							var nchannels = $scope.user.channels;
+							var ch = JSON.parse('{"id": "' + res[2] + '"}' );
+							nchannels.push(ch);		//add to user channel list
+							var schn = '{"id": "' + res[2] + '", "Channel": "' + message + '"}';
+							console.log('viewChannelCtrl addNewChannel post: ' + schn);
+							var chn = JSON.parse(schn);  // note only id and Channel is usable
+							var nchn = $scope.channelsList;
+							nchn.push(chn);
+							$scope.channelsList = nchn;
+							Slack.channelsList = nchn;
+							console.log('viewChannelCtrl addNewChannel nchn: ' + nchn);
+						}
+				   }
+				 
+				   });
+				   
+               $scope.name = '';
+                 }
+        };	  
+
+         
+			$scope.checkForUserChannel = function(channelid) {
+				var channels = Slack.user.channels;
+			//	console.log ("channelid " + channelid);
+				var idx;
+				for (idx = 0; idx < channels.length; idx++) {
+					if (channels[idx].id == channelid) {
+						return true;
+					}
+				}
+				return false;
+			};
+  
+
+       
 
       $scope.changeChannel = function(find) {
            // this should actually change the channel using a retrieve.
@@ -694,7 +872,11 @@ textarea.ta-bind {
 
     // End here
 
-  
+.config(function($mdThemingProvider) {
+  $mdThemingProvider.theme('default')
+    .primaryPalette('deep-purple')
+    .accentPalette('teal');
+})  
   
 .config(function($mdIconProvider) {
   $mdIconProvider
@@ -745,6 +927,129 @@ textarea.ta-bind {
   };
 })
 
+// should move this into user controller
+.controller('InviteCtrl', function($scope, $mdDialog, Slack){
+  var inviteScope = $scope;
+
+    var self = this;
+
+  
+    self.showInvites = function($event) {
+      
+   console.log( $scope.channel );
+     
+   console.log($scope.user);
+   $scope.users = Slack.users;
+   
+
+      $mdDialog.show({
+        controller: DialogController,
+        controllerAs: 'ctrl',
+        templateUrl: 'invite.tmpl.html',
+        parent: angular.element(document.body),
+        targetEvent: $event,
+        clickOutsideToClose:true
+      }); 
+    }
+
+
+
+function DialogController ($scope, $timeout, $q,  $mdDialog) {
+    var self = this;
+
+    self.users
+            = loadAll();
+    self.querySearch   = querySearch;
+
+   
+    self.cancel = function($event) {
+      $mdDialog.cancel();
+    };
+    self.finish = function($event) {
+      $mdDialog.hide();
+       // this should invoke the channel update 
+       // get the current channel
+       //console.log( $scope );
+       console.log(inviteScope.channel);
+       // get the id
+       // then update the user
+      //  console.log(inviteScope.user);
+      //  console.log(inviteScope.users);
+      //  console.log($scope.ctrl.searchText);
+      var found = inviteScope.users.find(function(u){ return $scope.ctrl.searchText === u.name });
+      // console.log( found );
+      // invoke channel update
+      inviteScope.$parent.addChannel(found.id, inviteScope.channel.id);
+    };
+
+    
+    function querySearch (query) {
+      return query ? self.users
+      .filter( createFilterFor(query) ) : self.users
+      ;
+    }
+
+    function loadAll() {
+
+      var allUsers = inviteScope.users.map( function(i){return i.name;});
+      
+      return allUsers.map( function (u) { //split(/, +/g)
+        return {
+          value: u.toLowerCase(),
+          display: u
+        };
+      });
+    }
+
+    /**
+     * Create filter function for a query string
+     */
+    function createFilterFor(query) {
+      var lowercaseQuery = angular.lowercase(query);
+
+      return function filterFn(s) {
+        return (s.value.indexOf(lowercaseQuery) === 0);
+      };
+
+    }
+  }
+
+
+  })
+
+.controller('RichTextCtrl', function($scope) {
+  $scope.tinymceOptions = {
+      selector: "textarea",
+      height: 50,
+      plugins: [
+          "advlist autolink autosave link image lists charmap print preview hr anchor pagebreak spellchecker",
+          "searchreplace wordcount visualblocks visualchars code fullscreen insertdatetime media nonbreaking",
+          "table contextmenu directionality emoticons template textcolor paste fullpage textcolor colorpicker textpattern"
+      ],
+
+      toolbar1: "bold italic underline strikethrough | formatselect fontselect fontsizeselect | forecolor backcolor ",
+      toolbar2: "cut copy paste | bullist numlist | blockquote | undo redo | link unlink image media | charmap emoticons | template ",
+
+      menubar: false,
+      toolbar_items_size: 'small',
+
+      templates: [{
+          title: 'Issue Request',
+          content: '<h2>Issue Request</h2><br/><b>Title:</b> <br/><b>Description:</b> <br/><b>Justification:</b> <br/>'
+      }, {
+          title: 'Enhancement Request',
+          content: '<h2>Enhancement Request</h2<b>Title:</b>  <br/><b>Description:</b> <br/><b>Priority:</b> <br/> <b>Classification:</b> <br/>'
+      }
+      
+      ],
+      content_css: [
+          '//fast.fonts.net/cssapi/e6dc9b99-64fe-4292-ad98-6974f93cd2a2.css',
+          '//www.tinymce.com/css/codepen.min.css'
+      ]
+  };
+})
+  
+
 .controller('TitleController', function($scope) {
   $scope.title = 'THE BOOTCAMP SLACK CLONE';
 });
@@ -779,16 +1084,22 @@ function insertTextAtCursor(text) {
 
     <md-toolbar class="md-hue-2">
       <div class="md-toolbar-tools">
-        <md-button class="md-icon-button" aria-label="Settings" ng-disabled="true">
-          <md-icon md-svg-icon="img/icons/menu.svg"></md-icon>
-        </md-button>
+        <md-icon md-svg-icon="avatar:svg-{{user.id + 1}}"></md-icon>
+        
         <h2>
-          <span>THE BOOTCAMP STACK CLONE</span>
+          <span> THE BOOTCAMP STACK CLONE</span>
         </h2>
         <md-progress-linear ng-if="waiting" md-mode="indeterminate"></md-progress-linear>
         <span flex=""></span>
         
-       
+        <div class="custom-style" id="custom-style">
+        
+        <notification-icon  animation="bounce"  count="notification">
+          <i class="fa fa-envelope-o"></i>
+        </notification-icon>
+        </div>
+      
+
         <md-button class="md-icon-button" ng-click="showPrompt($event)">
            <div ng-switch="loggedin">
               <md-icon  class="materials-icons" ng-switch-when="true">lock_open</md-icon>
@@ -801,14 +1112,18 @@ function insertTextAtCursor(text) {
   </md-content>
 </div>
 
-<div ng-controller="ChannelDetailCtrl" layout="column" style="height: 1000px;" ng-cloak="" class="sidenavdemoCustomSidenav" ng-app="slackApp">
+<div ng-controller="ChannelDetailCtrl" layout="column" style="height: 700px;" ng-cloak="" class="sidenavdemoCustomSidenav" ng-app="slackApp">
 
   <section layout="row" flex="">
 
     <md-sidenav class="md-sidenav-left" md-component-id="left" md-disable-backdrop="" md-whiteframe="4"> 
 
+     
       <md-toolbar class="md-theme-indigo">
-        <h1 class="md-toolbar-tools">CHANNELS</h1>
+        <h1 class="md-toolbar-tools">CHANNELS</h1>  <md-button ng-click="toggleLeft()">
+          Close
+        </md-button>
+
       </md-toolbar>
 
       <md-content layout-margin="">
@@ -819,7 +1134,10 @@ function insertTextAtCursor(text) {
         <p>
           CHANNELS ({{channels.length}})
           <md-divider></md-divider>
-          <md-list-item ng-repeat="item in channels"><md-button  ng-click="changeChannel(item.id)">{{item.name}} ({{item.messages.length}})</md-button>
+          <md-list-item ng-repeat="item in channels track by $index"><md-button  ng-click="changeChannel(item.id)">#{{item.name}} ({{item.messages.length}})</md-button>
+           <md-button class="md-warn md-icon-button" ng-click="removeChannelConfirm(item.id)">
+                <md-icon class="materials-icons" >delete_forever</md-icon>
+          </md-button>
           </md-list-item>
         </p>
        
@@ -830,8 +1148,8 @@ function insertTextAtCursor(text) {
           DIRECT MESSAGES
           <md-divider></md-divider>         
            <md-list-item  ng-repeat="u in users">
-              <md-button ng-click="changePrivateChannel(user,u)"><md-icon md-svg-icon="avatar:svg-{{u.id + 1}}">
-                </md-icon> {{u.name}} <span ng-if="u.id === user.id">(you)</span></md-button>
+              <md-button ng-click="changePrivateChannel(user,u)">
+                </md-icon>@{{u.name}} <span ng-if="u.id === user.id">(you)</span> <md-icon md-svg-icon="avatar:svg-{{u.id + 1}}"></md-button>
             </md-list-item>   
           </p>  
 
@@ -845,9 +1163,7 @@ function insertTextAtCursor(text) {
           </md-input-container> 
           </p>
          
-        <md-button ng-click="toggleLeft()" class="md-accent">
-          Close
-        </md-button>
+        
       </md-content>
 
     </md-sidenav>
@@ -861,13 +1177,11 @@ function insertTextAtCursor(text) {
             Show Channels
           </md-button>
         
-          <md-button class="md-raised md-secondary" ng-click="">
+          <md-button ng-controller="InviteCtrl as ctrl"  class="md-raised md-secondary" ng-click="ctrl.showInvites()">
             Invite Users
           </md-button>
 
-           <md-button class="md-raised md-warn" ng-click="removeChannelConfirm(channel.id)" >
-            Remove Channel
-          </md-button>
+           
 
          <div >
            <md-subheader class="md-primary">
@@ -888,7 +1202,7 @@ function insertTextAtCursor(text) {
                 <md-icon class="md-avatar-icon md-48"  md-svg-icon="avatar:svg-{{item.user.id + 1}}"></md-icon>
 
                 <div class="md-list-item-text" layout="column">
-                <div><b>{{ item.user.name }}</b>, {{asDate(item)}} says </div>
+                <div><b>{{ item.user.name }}</b> <i>{{asDate(item)}}</i> </div>
               <!--<p ng-click="goToPerson(item.user.name, $event)">--> 
 
               <div>
@@ -923,6 +1237,7 @@ function insertTextAtCursor(text) {
             
             </md-list-item>
             
+            
           </md-list>
 
             
@@ -939,23 +1254,28 @@ function insertTextAtCursor(text) {
 
               
   </section>
-
+<!--
   <md-content>
-    <md-subheader class="md-primary"> 
-         <md-icon  class="materials-icons">message</md-icon><md-button class="md-raised md-primary" ng-click="addMessage(false)"><b>ADD MESSAGE</b></md-button>      
-    </md-subheader>
-    <text-angular ng-model="newMessage"  
-    ta-toolbar="[['bold','italics','underline','strikeThrough','insertImage','insertLink','insertVideo']]"" name="editor" ta-text-editor-class="border-around" ta-html-editor-class="border-around"></text-angular>
-
+    
   </md-content>
 
-      
+      -->
+<div id="footer" style="height: 200px;">
+                  <md-icon  class="materials-icons">message</md-icon><md-button class="md-raised md-primary" ng-click="addMessage(false)"><b>ADD MESSAGE</b></md-button>
+    <form method="post">
+    <textarea  ui-tinymce="tinymceOptions"   ng-controller="RichTextCtrl"  ng-model="$parent.newMessage"></textarea>
+    </form>
+    <!--
+                  <text-angular  ng-model="newMessage" max-length="200"
+                  ta-toolbar="[['bold','italics','underline','strikeThrough','insertImage','insertLink','insertVideo']]"" name="editor" ta-text-editor-class="border-around" ta-html-editor-class="border-around"></text-angular>
+     -->
+                  </div>
 
 </div>
 
 <!--- bottom sheet --->
-
- <!--<div ng-controller="BottomSheetExample" class="md-padding bottomSheetdemoBasicUsage" ng-cloak="" ng-app="slackApp">
+<!--
+ <div ng-controller="BottomSheetExample" class="md-padding bottomSheetdemoBasicUsage" ng-cloak="" ng-app="slackApp">
   
   <div class="bottom-sheet-demo inset" layout="row" layout-sm="column" layout-align="center">
     <md-button flex="50" class="md-primary md-raised" ng-click="showListBottomSheet()">Show Actions</md-button>   
@@ -987,8 +1307,8 @@ function insertTextAtCursor(text) {
 </script>
 
 
-</div> -->
-
+</div> 
+-->
 
 </body>
 </html>
