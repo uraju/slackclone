@@ -1134,8 +1134,12 @@ function insertTextAtCursor(text) {
         <p>
           CHANNELS ({{channels.length}})
           <md-divider></md-divider>
-          <md-list-item ng-repeat="item in channels track by $index"><md-button  ng-click="changeChannel(item.id)">#{{item.name}} ({{item.messages.length}})</md-button>
-           <md-button class="md-warn md-icon-button" ng-click="removeChannelConfirm(item.id)">
+          <md-list-item ng-repeat="item in channels track by $index"><md-button  ng-click="changeChannel(item.id)">#{{item.name}}</md-button>
+          <notification-icon  animation="bounce"  count="item.messages.length">
+                            <i class="fa fa-sort-up"></i>
+                        </notification-icon>
+          <md-button class="md-warn md-icon-button" ng-click="removeChannelConfirm(item.id)">
+                        
                 <md-icon class="materials-icons" >delete_forever</md-icon>
           </md-button>
           </md-list-item>
