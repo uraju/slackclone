@@ -1,19 +1,28 @@
-<p>Messages in channel: {{channel.name}}</p>
-
-Search: <input type="text" ng-model="search"/>
-
-
-<ul>
-  <li ng-repeat="item in channelItems | filter: search"><a ng-href="#/message/{{item.id}}">{{item.content}}</a>
-   from {{item.user.name}}
-  </li>
-</ul>
-
-<p>Members in team: {{team.name}}</p>
-
-<ul>
-  <li ng-repeat="item in members">{{item.name}}
-  </li>
-</ul>
-
-<input type="text" ng-model="newMessage"/><button ng-click="addMessage()">Add Message</button>
+<hr/>  
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Messages in channel: {{channel.name}}</h3>
+  </div>
+	<div class="panel-body">
+		Search: <input type="text" ng-model="search"/>
+		<ul>
+		  <li ng-repeat="item in channelItems | filter: search"><a ng-href="#/message/{{item.id}}">{{item.content}}</a>
+		   from {{item.user.name}}
+		  </li>
+		</ul>
+	</div>
+</div>
+<hr/>
+ 
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Members in team: {{iteam.name}}</h3>
+  </div>
+	<div class="panel-body">
+		<ul>
+		  <li ng-repeat="item in members">{{item.name}}
+		  </li>
+		</ul>
+		<input type="text" ng-model="newMessage"/><button class="btn btn-default btn-raised" ng-click="addMessage()">Add Message</button>
+	</div>
+</div>

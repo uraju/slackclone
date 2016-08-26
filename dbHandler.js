@@ -619,7 +619,8 @@ function addNewUser(name) {
 					// stuff that works, copy of other channel
 					var stf= '{"id":+userid,"name":name,"channels":[{"id":0},{"id":1},{"id":2},{"id":3},{"id":4},{"id":5}]}';
                     
-					var stf= '{"id":'+ userid +',"name":" '+ name  +'","channels":[{"id":0},{"id":1},{"id":2},{"id":3},{"id":4},{"id":5}]}';
+					//var stf= '{"id":'+ userid +',"name":" '+ name  +'","channels":[{"id":0},{"id":1},{"id":2},{"id":3},{"id":4},{"id":5}]}';
+                    var stf= '{"id":'+ userid +',"name":" '+ name  +'","channels":[]}';
 					query = "update user set info = '"  + stf;
 					query = query + "' where id = " + userid;
 					console.log(query);

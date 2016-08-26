@@ -1,64 +1,48 @@
-<style>
-header {
-    padding: 1em;
-    color: white;
-    background-color: blue;
-    clear: left;
-    width: 100%;
-    text-align: center;
-}
-
-</style>
-
-<div>
-<h3>Current user {{user.name}}</h3>
+<hr/>
+<div class="panel panel-default">
+	<div class="panel-heading">
+		<h3 class="panel-title">Add/Remove Channels to User: {{user.name}}</h3>
+	</div>
+	<div class="panel-body">
+		<table class="table table-striped table-hove " >
+		  <tr ng-repeat="userChannel in channelsList">
+			<td> <span>{{userChannel.Channel}}</span>
+			</td>
+			<td>
+			  <span>
+			<div class="btn-group">
+			<button ng-show="!checkForUserChannel(userChannel.id)" type="submit" ng-click="addChannel(userChannel.id)" class="btn btn-default btn-raised" style="width: 150px;">  Add Channel </button>
+				<button ng-show="checkForUserChannel(userChannel.id)" type="submit" ng-click="removeChannel(userChannel.id)" class="btn btn-default btn-raised" style="width: 150px;"> Remove Channel </button>
+			</div>
+		  </span>
+			</td>
+		  </tr>
+		</table>
+	</div>
 </div>
-<table class="table table-striped table-hove " >
-  <tr ng-repeat="userChannel in channelsList">
-    <td> <span>{{userChannel.Channel}}</span>
-    </td>
-    <td>
-      <span>
-    <div class="btn-group">
-		<button ng-show="!checkForUserChannel(userChannel.id)" type="submit" ng-click="addChannel(userChannel.id)" style="width:200px;height:50px;margin-left: 10px;" class="btn btn-default btn-raised">  Add Channel </button>
-		<button ng-show="checkForUserChannel(userChannel.id)" type="submit" ng-click="removeChannel(userChannel.id)" style="width:200px;height:50px;margin-left: 10px;" class="btn btn-default btn-raised"> Remove Channel </button>
-    </div>
-  </span>
-    </td>
-  </tr>
-</table>
-<header>	
-<h3 >Add New Channel</h3>
-</header>
-		<form  name="form"  novalidate>  
-  <div class="form-group label-static">
-  <table>
-    <tr>
-        <td>
-        <label class="control-label">Channel Name </label>     
-        </td>
-      </tr>
-       <tr>
-        <td>
-          <input name="name" type="text"  ng-model="name" placeholder="Channel" style="width: 400px;height:40px" required />
-           </td>
-           <td>
-            <button type="submit" class="btn btn-raised" ng-click="addNewChannel(name,form)"> Add Channel </button>
-           </td>
-       </tr>
-          <tr>
-          <td>  
-             <div ng-show="showMsgs && form.$invalid" >
-                    <span style="color:red" ng-show="showMsgs && form.name.$error.required">
-                      User Name  Required
-              </span>
-               </div>
-          </td>           
-           
-        </tr>        
-</table>
+<hr/>
+
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Add New Channel</h3>
   </div>
+	<div class="panel-body">
+		<form  name="form"  novalidate>
+			<div class="form-group">
+				<label class="control-label">Channel Name</label>
+				<input name="name" type="text"  ng-model="name" placeholder="Channel" style="width: 400px;height:40px" required />
+				<button type="submit" class="btn btn-raised" ng-click="addNewChannel(name,form)"> Create Channel </button>
+			</div>
 		</form>
+        <div ng-show="showMsgs && form.$invalid" >
+            <span style="color:red" ng-show="showMsgs && form.name.$error.required">
+                      Channel Name  Required
+			</span>
+		</div>
+
+	</div>
+</div>
+  </div>
        
 	
 
