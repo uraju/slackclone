@@ -137,6 +137,7 @@ textarea.ta-bind {
   -->  
   
   <!-- Angular Material requires Angular.js Libraries -->
+  <script src="http://underscorejs.org/underscore-min.js"> </script>
   <script src="bower_components/angular/angular.min.js"></script>
   <script src="bower_components/angular-animate/angular-animate.min.js"></script>
   <script src="bower_components/angular-route/angular-route.min.js"></script>
@@ -312,7 +313,7 @@ textarea.ta-bind {
       console.log(Slack.users);
       // find user with same name
       
-      var founduser = Slack.users.find(function(item){ return item.name === result });
+      var founduser = _.find(Slack.users, function(item){ return item.name === result });
       
       if( founduser != null )
         {
@@ -397,7 +398,7 @@ textarea.ta-bind {
 
         console.log(find);
 
-        var channel = Slack.channels.find( function (item) { 
+        var channel = _.find(Slack.channels,function (item) { 
                    return item.id === find;
                } );
 
@@ -744,7 +745,7 @@ textarea.ta-bind {
         $scope.changePrivateChannel = function(user1, user2) {
        
            var channelid;
-           for( var c of user1.private){
+           for( var c in user1.private){
                if( c.userid === user2.id ){
                  channelid = c.channelid;
                  break;
@@ -845,7 +846,7 @@ textarea.ta-bind {
       
         var find = parseInt( $routeParams.messageId);
 
-        var index = Slack.messages.find( function (item) { 
+        var index = _.find(Slack.messages, function (item) { 
                    return item.id === find;
                } );
                
@@ -975,7 +976,7 @@ function DialogController ($scope, $timeout, $q,  $mdDialog) {
       //  console.log(inviteScope.user);
       //  console.log(inviteScope.users);
       //  console.log($scope.ctrl.searchText);
-      var found = inviteScope.users.find(function(u){ return $scope.ctrl.searchText === u.name });
+      var found = _.find(inviteScope.users, function(u){ return $scope.ctrl.searchText === u.name });
       // console.log( found );
       // invoke channel update
       inviteScope.$parent.addChannel(found.id, inviteScope.channel.id);
