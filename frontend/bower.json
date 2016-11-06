@@ -18,14 +18,14 @@
     "tests"
   ],
   "devDependencies": {
-    "angular-ui-tinymce": "~0.0.16"
+    "angular-ui-tinymce": "^0.0.17"
   },
   "dependencies": {
-    "angular-notification-icons": "^0.4.3",
+    "angular-notification-icons": "^0.4.4",
     "angular-material": "^1.1.1",
     "angular-route": "^1.5.8",
-    "font-awesome": "^4.6.3",
-    "lodash": "^4.15.0",
+    "font-awesome": "^4.7.0",
+    "lodash": "^4.16.6",
     "svg-assets-cache.js": "svg-assets-cache#*"
   }
 }
