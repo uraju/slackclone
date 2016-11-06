@@ -31,7 +31,7 @@ Timestamp
 
 
 */
-
+"use strict"; 
 var _ = require('lodash');
 var db =  require('./dbHandler.js');
 
