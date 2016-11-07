@@ -622,8 +622,16 @@ textarea.ta-bind {
 				//data: JSON.stringify($scope.channel)}).
 				data: JSON.stringify($scope.user)}).
                 success(function (data) {
+				    console.log('URL: /rest/user/'+ userid +'/addChannel/'+channelid);
 					console.log ("viewChannelCtrl addChannel completed! -------"  + data);
 					if (data == 'Added successfully') {
+					  //console.log("Add done...!");
+					  $mdToast.show(
+                      $mdToast.simple()
+                        .textContent('Channel added ...!')
+                        .position('bottom left')
+                        .hideDelay(3000)
+                    );
             // should alert
 					}				   
                   
@@ -994,6 +1002,7 @@ function DialogController ($scope, $timeout, $q,  $mdDialog) {
       var allUsers = inviteScope.users.map( function(i){return i.name;});
       
       return allUsers.map( function (u) { //split(/, +/g)
+	    console.log(u);
         return {
           value: u.toLowerCase(),
           display: u
@@ -1017,6 +1026,102 @@ function DialogController ($scope, $timeout, $q,  $mdDialog) {
 
   })
 
+// AddChannelToUserCtrl controller
+.controller('AddChannelToUserCtrl', function($scope, $mdDialog, Slack){
+  var addChannelToUser = $scope;
+
+    var self = this;
+
+  
+    self.showInvites = function($event) {
+      
+   console.log( $scope.channel );
+     
+   console.log($scope.user);
+   $scope.channelList = Slack.channelList;
+   
+
+      $mdDialog.show({
+        controller: DialogController,
+        controllerAs: 'ctrl',
+        templateUrl: 'addChannelToUser.tmpl',
+        parent: angular.element(document.body),
+        targetEvent: $event,
+        clickOutsideToClose:true
+      }); 
+    }
+
+
+
+function DialogController ($scope, $timeout, $q,  $mdDialog) {
+    var self = this;
+
+    self.channelList
+            = loadAll();
+    self.querySearch   = querySearch;
+
+   
+    self.cancel = function($event) {
+      $mdDialog.cancel();
+    };
+    self.finish = function($event) {
+      $mdDialog.hide();
+       // this should invoke the channel update 
+       // get the current channel
+       // console.log( $scope );
+       // console.log(addChannelToUser.channel);
+       // get the id
+       // then update the user
+      //  console.log(addChannelToUser.channel);
+      //  console.log(addChannelToUser.channels);
+      //  console.log($scope.ctrl.searchText);
+      var found = _.find(addChannelToUser.channelList, function(u){ return $scope.ctrl.searchText === u.Channel });
+      // console.log( found );
+      // invoke channel update
+      addChannelToUser.$parent.addChannel(addChannelToUser.user.id, found.id);
+    };
+
+    
+    function querySearch (query) {
+      return query ? self.channelList
+      .filter( createFilterFor(query) ) : self.channelList
+      ;
+    }
+
+    function loadAll() {
+	  //console.log(addChannelToUser.channelList);
+      var allChannels = addChannelToUser.channelList.map( function(i){
+		// console.log(i);
+		return i.Channel;
+		});
+      
+      return allChannels.map( function (u) { //split(/, +/g)
+	    console.log(u);
+		if (u !== undefined) {
+        return {
+          value: u.toLowerCase(),
+          display: u
+        };
+		}
+      });
+    }
+
+    /**
+     * Create filter function for a query string
+     */
+    function createFilterFor(query) {
+      var lowercaseQuery = angular.lowercase(query);
+
+      return function filterFn(s) {
+        return (s.value.indexOf(lowercaseQuery) === 0);
+      };
+
+    }
+  }
+
+
+  })
+  
 .controller('RichTextCtrl', function($scope) {
   $scope.tinymceOptions = {
       selector: "textarea",
@@ -1144,9 +1249,6 @@ function insertTextAtCursor(text) {
           </md-button>
           </md-list-item>
         </p>
-       
-       
-          
 
           <p ng-controller="UserListCtrl">
           DIRECT MESSAGES
@@ -1178,13 +1280,23 @@ function insertTextAtCursor(text) {
 
         <div>
           <md-button ng-click="toggleLeft()" class="md-raised md-primary">
-            Show Channels
+			<span flex>Show Channels</span>
+
           </md-button>
         
           <md-button ng-controller="InviteCtrl as ctrl"  class="md-raised md-secondary" ng-click="ctrl.showInvites()">
-            Invite Users
+			<md-tooltip md-direction="bottom">
+			  Invite a user to current channel
+			</md-tooltip>
+			<span flex>Invite Users</span>
           </md-button>
 
+          <md-button ng-controller="AddChannelToUserCtrl as ctrl"  class="md-raised md-secondary" ng-click="ctrl.showInvites()">
+			<md-tooltip md-direction="bottom">
+			  Add a channel to current user
+			</md-tooltip>
+			<span flex>Add Channels</span>
+          </md-button>
            
 
          <div >
