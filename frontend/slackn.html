@@ -1374,9 +1374,10 @@ function insertTextAtCursor(text) {
   <md-content>
     
   </md-content>
-
+  <section layout="row" flex="">
       -->
-<div id="footer" style="height: 200px;">
+	<section layout="row" flex="25" style="min-height: 200px;">
+	<div id="footer" >
                   <md-icon  class="materials-icons">message</md-icon><md-button class="md-raised md-primary" ng-click="addMessage(false)"><b>ADD MESSAGE</b></md-button>
     <form method="post">
     <textarea  ui-tinymce="tinymceOptions"   ng-controller="RichTextCtrl"  ng-model="$parent.newMessage"></textarea>
@@ -1386,7 +1387,7 @@ function insertTextAtCursor(text) {
                   ta-toolbar="[['bold','italics','underline','strikeThrough','insertImage','insertLink','insertVideo']]"" name="editor" ta-text-editor-class="border-around" ta-html-editor-class="border-around"></text-angular>
      -->
                   </div>
-
+	</section>
 </div>
 
 <!--- bottom sheet --->
